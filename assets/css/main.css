@@ -896,3 +896,33 @@ body.light-theme{
     }
 
 }
+
+
+.blog-post-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.blog-post-data img {
+    max-width: 900px;
+    height: 600px;
+    margin-bottom: 10px; /* Adjust the margin as needed */
+}
+
+/* Optional: You can add more styling to the blog post content if necessary */
+.blog-post-container p {
+    margin-bottom: 20px;
+    /* Add any other styles you want for the paragraphs */
+}
+
+.blockquote {
+    margin: 20px 0;
+    /* Add any other styles you want for the blockquote */
+}
+
+.author {
+    margin-top: 20px;
+    /* Add any other styles you want for the author section */
+}
