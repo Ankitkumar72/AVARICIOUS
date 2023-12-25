@@ -669,8 +669,8 @@ body.light-theme{
 }
 
 .blog-post-data img{
-    width: 100%;
-    height: var(--item-min-height-sm);
+    width: 800px;
+    height: 100%;
     object-fit: cover;
     object-position: center 10%;
 }
