@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import './index.css' // Global styles
-import { Link } from 'react-router-dom'
-import logoImg from './assets/logo.png' // Import logo
-
+import { Link, useSearchParams } from 'react-router-dom'
+import Header from './Header'
 
 // Helper Component for Highlighting Text
 const HighlightText = ({ text, highlight }) => {
@@ -23,13 +22,6 @@ const HighlightText = ({ text, highlight }) => {
         </span>
     );
 };
-
-const SearchIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-);
 
 const NEWS_ITEMS = [
     {
@@ -71,43 +63,21 @@ const NEWS_ITEMS = [
 ];
 
 function Home() {
-    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchParams] = useSearchParams();
+    const searchQuery = searchParams.get('q') || '';
     const newsGridRef = useRef(null); // Reference for scrolling
-    const searchContainerRef = useRef(null); // Reference for search container click detection
 
-    // Click outside handler
+    // Scroll to results if query exists
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-                setIsSearchOpen(false);
-            }
+        if (searchQuery && newsGridRef.current) {
+            newsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-
-        if (isSearchOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        } else {
-            document.removeEventListener("mousedown", handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isSearchOpen]);
+    }, [searchQuery]);
 
     const filteredNews = NEWS_ITEMS.filter(item =>
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        // Scroll to results when user presses Enter
-        if (newsGridRef.current) {
-            newsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    };
 
     return (
         <div className="app-main-wrapper">
@@ -122,98 +92,7 @@ function Home() {
                 <div className="corner-marker corner-bottom-right"></div>
 
                 {/* Header */}
-                <header className="app-header">
-                    <div className="header-brand">
-                        <img src={logoImg} alt="Logo" className="header-logo" />
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '1px' }}>PIXY<span className="text-accent">|</span>NEWS</div>
-                        <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>SYS.VER.2.0.4</span>
-                    </div>
-
-                    <div className="header-meta mono text-secondary">
-                        <span>LAT: 46.6242° N</span>
-                        <span>LONG: 8.0414° E</span>
-                        <span>LIVE FEED</span>
-                    </div>
-
-                    <div className="header-search" ref={searchContainerRef}>
-                        {isSearchOpen ? (
-                            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px', animation: 'fadeIn 0.3s' }}>
-                                <input
-                                    type="text"
-                                    placeholder="SEARCH SYSTEM..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    autoFocus
-                                    style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        borderBottom: '1px solid var(--accent-color)',
-                                        color: 'white',
-                                        fontFamily: 'var(--font-mono)',
-                                        padding: '5px',
-                                        width: '200px',
-                                        outline: 'none'
-                                    }}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setIsSearchOpen(false);
-                                        setSearchQuery('');
-                                    }}
-                                    style={{ color: '#666', fontSize: '1.2rem', cursor: 'pointer' }}
-                                >
-                                    ×
-                                </button>
-                            </form>
-                        ) : (
-                            <button
-                                className="mono search-label"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setIsSearchOpen(true);
-                                }}
-                                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                            >
-                                SEARCH <SearchIcon />
-                            </button>
-                        )}
-
-                        <div
-                            className="hamburger-menu"
-                            onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-                            style={{ width: '20px', height: '14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer', zIndex: 1001, position: 'relative' }}
-                        >
-                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }}></div>
-                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', opacity: isMobileMenuOpen ? 0 : 1 }}></div>
-                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }}></div>
-                        </div>
-                    </div>
-                </header>
-
-                {/* Mobile Menu Overlay */}
-                <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
-                    <div className="mobile-search-container">
-                        <span className="mono text-accent" style={{ marginBottom: '10px', display: 'block' }}>SYSTEM SEARCH</span>
-                        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', borderBottom: '1px solid #333', alignItems: 'center' }}>
-                            <input
-                                type="text"
-                                placeholder="ENTER KEYWORDS..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', padding: '10px 0', outline: 'none', fontFamily: 'var(--font-mono)' }}
-                            />
-                            <button type="submit" style={{ color: '#666', padding: '0 5px' }}><SearchIcon /></button>
-                        </form>
-                    </div>
-                    <div className="mobile-menu-links mono">
-                        <a href="#">LATEST_FEED</a>
-                        <a href="#">ARCHIVE</a>
-                        <a href="#">PROTOCOL</a>
-                        <a href="#">CONTACT</a>
-                    </div>
-                </div>
+                <Header />
 
                 {/* Main Hero Grid */}
                 <section className="hero-section">
@@ -222,16 +101,7 @@ function Home() {
                     <div className="hero-content">
 
                         {/* Vertical Text Sidebar */}
-                        <div className="mono text-secondary" style={{
-                            position: 'absolute',
-                            left: '15px',
-                            top: '100px',
-                            writingMode: 'vertical-rl',
-                            transform: 'rotate(180deg)',
-                            fontSize: '0.7rem',
-                            letterSpacing: '2px',
-                            opacity: 0.5
-                        }}>
+                        <div className="mono text-secondary vertical-sidebar">
                             SECTOR 7 // A-WING
                         </div>
 
