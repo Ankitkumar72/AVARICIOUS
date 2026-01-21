@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import './index.css' // Global styles
 import { Link } from 'react-router-dom'
+import logoImg from './assets/logo.png' // Import logo
 
-// Images will be verified after basic structure is up
+// Images will be verified after verify basic structure is up
 // Using placeholders for now where images are missing or broken
 // import cyborgImg from './assets/cyborg_woman.png'
 // import curversImg from './assets/abstract_curves.png'
@@ -32,7 +33,7 @@ function Home() {
                     fontSize: '0.8rem'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <div style={{ background: '#00f0ff', width: '30px', height: '30px', display: 'grid', placeItems: 'center', color: 'black', fontWeight: 'bold' }}>#</div>
+                        <img src={logoImg} alt="Logo" style={{ height: '30px', width: 'auto' }} />
                         <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '1px' }}>PIXY<span className="text-accent">|</span>NEWS</div>
                         <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>SYS.VER.2.0.4</span>
                     </div>

@@ -1,7 +1,7 @@
-
 import React from 'react';
 import './index.css';
 import { Link } from 'react-router-dom';
+import logoImg from './assets/logo.png';
 
 function BlogPost() {
     return (
@@ -22,7 +22,7 @@ function BlogPost() {
                     fontSize: '0.8rem'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <div style={{ background: '#00f0ff', width: '30px', height: '30px', display: 'grid', placeItems: 'center', color: 'black', fontWeight: 'bold' }}>#</div>
+                        <img src={logoImg} alt="Logo" style={{ height: '30px', width: 'auto' }} />
                         <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '1px' }}>PIXY<span className="text-accent">|</span>NEWS <span className="mono text-secondary">[ARCHIVE 001]</span></div>
                     </div>
 
