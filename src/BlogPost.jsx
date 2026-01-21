@@ -1,9 +1,51 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './index.css';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Header from './Header';
+import { supabase } from './supabaseClient';
 
 function BlogPost() {
+    const { id } = useParams();
+    const [post, setPost] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Fetch specific post
+        const fetchPost = async () => {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from('news_posts')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (data) {
+                setPost(data);
+            }
+            setLoading(false);
+        };
+
+        if (id) {
+            fetchPost();
+        }
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="app-main-wrapper" style={{ display: 'grid', placeItems: 'center', height: '100vh', color: 'var(--accent-color)' }}>
+                <div className="mono">LOADING_ARCHIVE_DATA...</div>
+            </div>
+        );
+    }
+
+    if (!post) {
+        return (
+            <div className="app-main-wrapper" style={{ display: 'grid', placeItems: 'center', height: '100vh', color: 'red' }}>
+                <div className="mono">ERROR: FILE_NOT_FOUND [{id}]</div>
+            </div>
+        );
+    }
+
     return (
         <div className="app-main-wrapper">
             <div className="app-layout">
@@ -15,16 +57,11 @@ function BlogPost() {
                 {/* Header */}
                 <Header />
 
-
-
                 {/* Hero Title */}
                 <section style={{ padding: '80px 50px', borderBottom: '1px solid var(--grid-color)' }}>
-                    <h1 className="hero-title" style={{ margin: 0 }}>
-                        THE SYNTHETIC<br />
-                        HORIZON<span style={{ color: '#444' }}>:</span> AI<br />
-                        IN ARCHITECTURE
+                    <h1 className="hero-title" style={{ margin: 0, fontSize: 'clamp(2rem, 5vw, 4rem)' }}>
+                        {post.title}
                     </h1>
-                    {/* Subtle background image hint could go here */}
                 </section>
 
                 {/* Main Content Grid */}
@@ -41,19 +78,19 @@ function BlogPost() {
                             <div className="mono sidebar-meta-list">
                                 <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>AUTHOR</div>
-                                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>DR. A. SILVA</div>
+                                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>UNIT_ADMIN</div>
                                 </div>
                                 <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>TIMESTAMP (UTC)</div>
-                                    <div>2026-10-27<br />14:02Z</div>
+                                    <div>{new Date(post.updated_at).toLocaleDateString()}<br />{new Date(post.updated_at).toLocaleTimeString()}</div>
                                 </div>
                                 <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>COORDINATES</div>
-                                    <div>34.05° N,<br />118.24° W</div>
+                                    <div>{post.coordinates || 'UNKNOWN'}</div>
                                 </div>
                                 <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>READ TIME</div>
-                                    <div>08 MIN / 1,402 WD</div>
+                                    <div>{Math.ceil((post.content?.length || 0) / 500)} MIN</div>
                                 </div>
                             </div>
                         </div>
@@ -67,71 +104,20 @@ function BlogPost() {
                     {/* Main Article Content */}
                     <main style={{ padding: '60px', borderRight: '1px solid var(--grid-color)' }}>
 
-                        {/* Lead Text */}
-                        {/* Lead Text */}
-                        <div className="article-lead">
-                            Exploring the intersection of generative algorithms and physical space, we question if the blueprint of the future is drawn by hand or hallucinated by code.
-                        </div>
-
-                        {/* Body Text */}
-                        <div className="article-body">
-                            <span className="drop-cap">T</span>
-                            he architectural grid has long been the symbol of rational order. From the Roman castrum to the Modernist skyscrapers of Mies van der Rohe, the grid represented control, predictability, and human dominance over the chaos of nature. Today, however, that grid is being re-imagined not by architects, but by neural networks.
-                        </div>
-
-                        <p className="article-paragraph">
-                            In the heart of the new digital brutalism, we find a paradox. The strict lines of code that govern AI models produce forms that are organic, fluid, and often defy structural logic. <span style={{ color: 'white', textDecoration: 'underline', textDecorationColor: 'var(--accent-color)' }}>Generative design</span> is no longer a tool for optimization but a partner in creation.
-                        </p>
-
-                        {/* Subheader */}
-                        <h3 className="article-subheader">
-                            <span className="text-accent mono" style={{ marginRight: '10px' }}>[01]</span> THE HALLUCINATED STRUCTURE
-                        </h3>
-
-                        <p className="article-paragraph">
-                            When we feed architectural archives into a diffusion model, what returns is a ghost. Buildings that look familiar but possess alien geometries. Windows that open into voids, staircases that spiral into non-Euclidean spaces. This is the <strong style={{ color: 'white' }}>Synthetic Horizon</strong>.
-                        </p>
-
-                        {/* Image Placeholder */}
-                        <div className="article-image-container">
-                            <div className="article-image-placeholder">
-                                <div style={{ width: '50px', height: '50px', background: '#333' }}></div>
-                                <div style={{ width: '80px', height: '80px', background: '#444', transform: 'translate(30px, -20px)' }}></div>
-                            </div>
-                            <div className="mono text-secondary image-caption">
-                                <span>FIG 1.1 -- CONCRETE DIFFUSION</span>
-                                <span>SIZE: 20MB</span>
-                            </div>
-                        </div>
-
-                        <p className="article-paragraph">
-                            The implication for physical construction is profound. If our tools can dream up structures that ignore gravity, how do we translate them to steel and glass? The answer lies in 3D printing and material science, bridging the gap between the digital hallucination and the tangible world.
-                        </p>
-
-                        {/* Subheader */}
-                        <h3 className="article-subheader">
-                            <span className="text-accent mono" style={{ marginRight: '10px' }}>[02]</span> ZERO-POINT METADATA
-                        </h3>
-
-                        <p className="article-paragraph">
-                            We are moving towards an architecture of information. A building is no longer just shelter; it is a data set. Every beam, every bolt, every lux of light is quantified. In this <span style={{ textDecoration: 'underline' }}>hyper-measured reality</span>, the role of the architect shifts from designer to curator.
-                        </p>
-
-                        {/* Quote */}
-                        <blockquote className="article-quote">
-                            "The grid is not a prison. It is the lattice upon which the future grows."
-                        </blockquote>
-
-                        <p className="article-paragraph">
-                            As we stand on this precipice, looking out at a skyline generated by algorithms, we must ask: does the soul of a building reside in the intention of its creator, or in the complexity of its code?
-                        </p>
+                        {/* We are treating content as raw text for now. Markdown rendering would require a library. */}
+                        {/* Splitting paragraphs by double newline for simple formatting */}
+                        {post.content?.split('\n\n').map((paragraph, idx) => (
+                            <p key={idx} className="article-paragraph" style={{ whiteSpace: 'pre-line' }}>
+                                {paragraph}
+                            </p>
+                        ))}
 
                         <div className="article-divider"></div>
 
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <div className="mono text-accent" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>NEXT ARTICLE</div>
-                            <Link to="#" className="next-article-link">
-                                DIGITAL DECAY IN VR <span>→</span>
+                            <Link to="/" className="next-article-link">
+                                RETURN TO INDEX <span>→</span>
                             </Link>
                         </div>
 
@@ -142,7 +128,7 @@ function BlogPost() {
                         <div style={{ marginBottom: '30px' }}>
                             <div className="mono text-accent" style={{ fontSize: '0.8rem', marginBottom: '15px' }}>[ RELATED TAGS ]</div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                                {['#AI', '#ARCHITECTURE', '#BRUTALISM', '#FUTURE', '#GENERATIVE'].map(tag => (
+                                {['#AI', '#SYSTEM', '#LOG'].map(tag => (
                                     <span key={tag} className="mono" style={{
                                         border: '1px solid #333',
                                         padding: '5px 10px',

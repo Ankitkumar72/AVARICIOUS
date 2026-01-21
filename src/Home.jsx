@@ -1,7 +1,9 @@
+
 import { useState, useRef, useEffect } from 'react'
 import './index.css' // Global styles
 import { Link, useSearchParams } from 'react-router-dom'
 import Header from './Header'
+import { useBlog } from './context/BlogContext';
 
 // Helper Component for Highlighting Text
 const HighlightText = ({ text, highlight }) => {
@@ -23,60 +25,22 @@ const HighlightText = ({ text, highlight }) => {
     );
 };
 
-const NEWS_ITEMS = [
-    {
-        id: 1,
-        category: 'HARDWARE',
-        time: '14:02 UTC',
-        title: 'Quantum Chip Throughput Exceeds Theoretical Limits',
-        excerpt: 'Researchers at the Void Institute have successfully stabilized a 1000-qubit processor at room temperature, shattering previous computational barriers.',
-        imagePlaceholder: '[CHIP_MACRO]',
-        bgStyle: 'linear-gradient(to top, #0a0a0a, #222)'
-    },
-    {
-        id: 2,
-        category: 'NETWORK',
-        time: '13:45 UTC',
-        title: 'The Great Firewall of Sector 4 Has Fallen',
-        excerpt: 'Unauthorized data streams are flooding the local subnet. Authorities are scrambling to patch the zero-day exploit found in the legacy infrastructure.',
-        imagePlaceholder: null, // Custom render in original
-        bgStyle: 'radial-gradient(circle, #333 0%, #000 70%)',
-        customImage: (
-            <div style={{ width: '150px', height: '150px', border: '2px solid white', borderRadius: '50%', boxShadow: '0 0 20px white' }}></div>
-        )
-    },
-    {
-        id: 3,
-        category: 'SECURITY',
-        time: '12:10 UTC',
-        title: 'Biometric Data Leak Affects 30 Million Androids',
-        excerpt: 'A breach in the central registry has exposed sensitive memory cores. Recall protocols have been initiated for all affected units.',
-        imagePlaceholder: null,
-        bgStyle: 'linear-gradient(135deg, #111 0%, #333 100%)',
-        customImage: (
-            <>
-                <div style={{ width: '60px', height: '80px', border: '5px solid #888', borderRadius: '10px 10px 0 0', borderBottom: 'none' }}></div>
-                <div style={{ width: '80px', height: '60px', background: '#888', borderRadius: '5px', marginTop: '-40px' }}></div>
-            </>
-        )
-    }
-];
-
 function Home() {
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('q') || '';
-    const newsGridRef = useRef(null); // Reference for scrolling
+    const newsGridRef = useRef(null);
+    const { posts, loading } = useBlog();
 
-    // Scroll to results if query exists
     useEffect(() => {
         if (searchQuery && newsGridRef.current) {
             newsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }, [searchQuery]);
 
-    const filteredNews = NEWS_ITEMS.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    // Filter posts
+    const filteredNews = posts.filter(item =>
+        item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -178,28 +142,43 @@ function Home() {
                     </div>
                 </section>
 
-                {/* Three Column News Grid */}
+                {/* News Grid */}
                 <section className="news-grid" ref={newsGridRef}>
-                    {filteredNews.length > 0 ? (
+                    {loading ? (
+                        <div style={{ gridColumn: '1 / -1', padding: '60px', textAlign: 'center', color: '#666' }}>
+                            <div className="mono">LOADING_DATA_STREAM...</div>
+                        </div>
+                    ) : filteredNews.length > 0 ? (
                         filteredNews.map((news) => (
                             <div key={news.id} className="news-item">
-                                <div className="news-image">
-                                    <div style={{ width: '100%', height: '100%', background: news.bgStyle, display: 'grid', placeItems: 'center' }}>
-                                        {news.customImage ? news.customImage : <span className="mono text-secondary">{news.imagePlaceholder}</span>}
-                                    </div>
+                                <div className="news-image news-link-wrapper">
+                                    <Link to={`/blog/${news.id}`} style={{ display: 'block', width: '100%', height: '100%', textDecoration: 'none' }}>
+                                        <div style={{ width: '100%', height: '100%', background: news.bgStyle || '#111', display: 'grid', placeItems: 'center', position: 'relative' }}>
+                                            {news.image_url ? (
+                                                <img src={news.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+                                            ) : (
+                                                <span className="mono text-secondary">[NO_IMG_DATA]</span>
+                                            )}
+                                        </div>
+                                    </Link>
                                 </div>
                                 <div className="news-content">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                                         <span className="mono" style={{ background: '#222', padding: '2px 6px', fontSize: '0.7rem' }}>
-                                            <HighlightText text={news.category} highlight={searchQuery} />
+                                            <HighlightText text={news.category || 'GENERAL'} highlight={searchQuery} />
                                         </span>
-                                        <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>{news.time}</span>
+                                        <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>
+                                            {news.updated_at ? new Date(news.updated_at).toLocaleTimeString() : '---'}
+                                        </span>
                                     </div>
                                     <h3 style={{ fontSize: '1.5rem', lineHeight: '1.2', margin: '0 0 15px 0' }}>
-                                        <HighlightText text={news.title} highlight={searchQuery} />
+                                        <Link to={`/blog/${news.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                            <HighlightText text={news.title} highlight={searchQuery} />
+                                        </Link>
                                     </h3>
                                     <p className="text-secondary" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                        <HighlightText text={news.excerpt} highlight={searchQuery} />
+                                        {/* Simple truncate for excerpt */}
+                                        <HighlightText text={news.content?.substring(0, 100) + '...'} highlight={searchQuery} />
                                     </p>
                                 </div>
                             </div>
@@ -213,7 +192,6 @@ function Home() {
                 </section>
 
                 {/* Subscription Section */}
-                {/* Subscription Section */}
                 <section className="subscription-section">
                     <div className="mono text-accent" style={{ letterSpacing: '4px', fontSize: '0.8rem', marginBottom: '20px' }}>SYSTEM NOTIFICATION</div>
                     <h2 className="subscription-title">SUBSCRIBE TO<br />THE BLUEPRINT</h2>
@@ -226,7 +204,6 @@ function Home() {
                     <div className="deco-line right"></div>
                 </section>
 
-                {/* Latest Transmissions */}
                 {/* Latest Transmissions */}
                 <section style={{ borderBottom: '1px solid var(--grid-color)' }}>
                     <div className="transmissions-header">
@@ -257,7 +234,6 @@ function Home() {
                 </section>
 
                 {/* Footer */}
-                {/* Footer */}
                 <footer className="app-footer">
                     <div className="footer-top">
                         <div>
@@ -283,7 +259,7 @@ function Home() {
             </div>
 
         </div>
-    )
+    );
 }
 
-export default Home
+export default Home;

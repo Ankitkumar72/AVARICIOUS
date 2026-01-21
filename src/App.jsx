@@ -1,10 +1,13 @@
 import { Suspense, lazy } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { BlogProvider } from './context/BlogContext';
 import './index.css';
 
 // Lazy load components
 const Home = lazy(() => import('./Home'));
 const BlogPost = lazy(() => import('./BlogPost'));
+const Login = lazy(() => import('./pages/Login'));
+const EditPost = lazy(() => import('./pages/EditPost'));
 
 // Loading Fallback Component
 const LoadingScreen = () => (
@@ -32,10 +35,34 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/blog/synthetic-horizon",
+    path: "/blog/:id",
     element: (
       <Suspense fallback={<LoadingScreen />}>
         <BlogPost />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/login",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <Login />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/editor",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <EditPost />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/editor/:id",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <EditPost />
       </Suspense>
     ),
   },
@@ -43,7 +70,9 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <BlogProvider>
+      <RouterProvider router={router} />
+    </BlogProvider>
   );
 }
 

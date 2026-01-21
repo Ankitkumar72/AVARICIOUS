@@ -11,7 +11,7 @@ const SearchIcon = () => (
     </svg>
 );
 
-const Header = () => {
+const Header = ({ minimal = false }) => {
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchParams] = useSearchParams();
@@ -78,52 +78,56 @@ const Header = () => {
                 </div>
 
                 <div className="header-search" ref={searchContainerRef}>
-                    {isSearchOpen ? (
-                        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px', animation: 'fadeIn 0.3s' }}>
-                            <input
-                                type="text"
-                                placeholder="SEARCH SYSTEM..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                autoFocus
-                                className="search-input-field"
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    borderBottom: '1px solid var(--accent-color)',
-                                    color: 'white',
-                                    fontFamily: 'var(--font-mono)',
-                                    padding: '5px',
-                                    outline: 'none'
-                                }}
-                            />
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setIsSearchOpen(false);
-                                    setSearchQuery('');
-                                    navigate('/'); // Clear search from URL too maybe?
-                                }}
-                                style={{ color: '#666', fontSize: '1.2rem', cursor: 'pointer' }}
-                            >
-                                ×
-                            </button>
-                        </form>
-                    ) : (
-                        <button
-                            className="mono search-label"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setIsSearchOpen(true);
-                            }}
-                            style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                        >
-                            SEARCH <SearchIcon />
-                        </button>
-                    )}
+                    {!minimal && (
+                        <>
+                            {isSearchOpen ? (
+                                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px', animation: 'fadeIn 0.3s' }}>
+                                    <input
+                                        type="text"
+                                        placeholder="SEARCH SYSTEM..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        autoFocus
+                                        className="search-input-field"
+                                        style={{
+                                            background: 'transparent',
+                                            border: 'none',
+                                            borderBottom: '1px solid var(--accent-color)',
+                                            color: 'white',
+                                            fontFamily: 'var(--font-mono)',
+                                            padding: '5px',
+                                            outline: 'none'
+                                        }}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setIsSearchOpen(false);
+                                            setSearchQuery('');
+                                            navigate('/');
+                                        }}
+                                        style={{ color: '#666', fontSize: '1.2rem', cursor: 'pointer' }}
+                                    >
+                                        ×
+                                    </button>
+                                </form>
+                            ) : (
+                                <button
+                                    className="mono search-label"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setIsSearchOpen(true);
+                                    }}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                                >
+                                    SEARCH <SearchIcon />
+                                </button>
+                            )}
 
-                    <NavButton isOpen={isMobileMenuOpen} onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} />
+                            <NavButton isOpen={isMobileMenuOpen} onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} />
+                        </>
+                    )}
                 </div>
             </header>
 
