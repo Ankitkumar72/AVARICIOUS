@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import logoImg from './assets/logo.png';
 import './index.css';
+import NavButton from './NavButton';
 
 const SearchIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -122,25 +123,38 @@ const Header = () => {
                         </button>
                     )}
 
-                    <div
-                        className="hamburger-menu"
-                        onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-                        style={{ width: '20px', height: '14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer', zIndex: 1001, position: 'relative' }}
-                    >
-                        <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }}></div>
-                        <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', opacity: isMobileMenuOpen ? 0 : 1 }}></div>
-                        <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }}></div>
-                    </div>
+                    <NavButton isOpen={isMobileMenuOpen} onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} />
                 </div>
             </header>
 
             {/* Mobile Menu Overlay */}
+            <div
+                className={`menu-backdrop ${isMobileMenuOpen ? 'open' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+            ></div>
             <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
 
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, opacity: 0.1, pointerEvents: 'none', backgroundSize: '30px 30px', backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)' }}></div>
+
+                <div className="menu-header">
+                    <div>
+                        <div className="mono text-accent" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>// PIXY_NEWS_PROTOCOL_V2.0</div>
+                        <div style={{ fontSize: '2rem', fontWeight: 'bold', lineHeight: 1 }}>MAIN MENU</div>
+                    </div>
+                    <NavButton isOpen={true} onClick={() => setMobileMenuOpen(false)} className="menu-close-btn" />
+                </div>
+
                 <div className="mobile-menu-links mono">
-                    <Link to="/" onClick={() => setMobileMenuOpen(false)}>INDEX</Link>
-                    <Link to="#" onClick={() => setMobileMenuOpen(false)}>ARCHIVE</Link>
-                    <Link to="#" onClick={() => setMobileMenuOpen(false)}>ABOUT</Link>
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="menu-link-item">
+                        <span className="menu-number text-accent">[01]</span> INDEX
+                    </Link>
+                    <Link to="#" onClick={() => setMobileMenuOpen(false)} className="menu-link-item">
+                        <span className="menu-number text-accent">[02]</span> ARCHIVE
+                    </Link>
+                    <Link to="#" onClick={() => setMobileMenuOpen(false)} className="menu-link-item">
+                        <span className="menu-number text-accent">[03]</span> ABOUT
+                    </Link>
+
                 </div>
             </div>
         </>
