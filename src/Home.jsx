@@ -1,18 +1,116 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import './index.css' // Global styles
 import { Link } from 'react-router-dom'
 import logoImg from './assets/logo.png' // Import logo
 
-// Images will be verified after verify basic structure is up
-// Using placeholders for now where images are missing or broken
-// import cyborgImg from './assets/cyborg_woman.png'
-// import curversImg from './assets/abstract_curves.png'
-// import lockImg from './assets/lock_secure.png'
-// import chipImg from './assets/chip_macro.png'
+
+// Helper Component for Highlighting Text
+const HighlightText = ({ text, highlight }) => {
+    if (!highlight || !text) return text;
+
+    // Split text on highlight term, include term in parts, ignore case
+    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
+
+    return (
+        <span>
+            {parts.map((part, i) =>
+                part.toLowerCase() === highlight.toLowerCase() ? (
+                    <span key={i} className="search-highlight">{part}</span>
+                ) : (
+                    part
+                )
+            )}
+        </span>
+    );
+};
+
+const SearchIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+);
+
+const NEWS_ITEMS = [
+    {
+        id: 1,
+        category: 'HARDWARE',
+        time: '14:02 UTC',
+        title: 'Quantum Chip Throughput Exceeds Theoretical Limits',
+        excerpt: 'Researchers at the Void Institute have successfully stabilized a 1000-qubit processor at room temperature, shattering previous computational barriers.',
+        imagePlaceholder: '[CHIP_MACRO]',
+        bgStyle: 'linear-gradient(to top, #0a0a0a, #222)'
+    },
+    {
+        id: 2,
+        category: 'NETWORK',
+        time: '13:45 UTC',
+        title: 'The Great Firewall of Sector 4 Has Fallen',
+        excerpt: 'Unauthorized data streams are flooding the local subnet. Authorities are scrambling to patch the zero-day exploit found in the legacy infrastructure.',
+        imagePlaceholder: null, // Custom render in original
+        bgStyle: 'radial-gradient(circle, #333 0%, #000 70%)',
+        customImage: (
+            <div style={{ width: '150px', height: '150px', border: '2px solid white', borderRadius: '50%', boxShadow: '0 0 20px white' }}></div>
+        )
+    },
+    {
+        id: 3,
+        category: 'SECURITY',
+        time: '12:10 UTC',
+        title: 'Biometric Data Leak Affects 30 Million Androids',
+        excerpt: 'A breach in the central registry has exposed sensitive memory cores. Recall protocols have been initiated for all affected units.',
+        imagePlaceholder: null,
+        bgStyle: 'linear-gradient(135deg, #111 0%, #333 100%)',
+        customImage: (
+            <>
+                <div style={{ width: '60px', height: '80px', border: '5px solid #888', borderRadius: '10px 10px 0 0', borderBottom: 'none' }}></div>
+                <div style={{ width: '80px', height: '60px', background: '#888', borderRadius: '5px', marginTop: '-40px' }}></div>
+            </>
+        )
+    }
+];
 
 function Home() {
+    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const newsGridRef = useRef(null); // Reference for scrolling
+    const searchContainerRef = useRef(null); // Reference for search container click detection
+
+    // Click outside handler
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+                setIsSearchOpen(false);
+            }
+        }
+
+        if (isSearchOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isSearchOpen]);
+
+    const filteredNews = NEWS_ITEMS.filter(item =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        // Scroll to results when user presses Enter
+        if (newsGridRef.current) {
+            newsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
     return (
-        <div className="app-main-wrapper" style={{ width: '100vw', minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+        <div className="app-main-wrapper">
 
             {/* Boxed Layout Container */}
             <div className="app-layout">
@@ -24,41 +122,104 @@ function Home() {
                 <div className="corner-marker corner-bottom-right"></div>
 
                 {/* Header */}
-                <header style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '25px 50px',
-                    borderBottom: '1px solid var(--grid-color)',
-                    fontSize: '0.8rem'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <img src={logoImg} alt="Logo" style={{ height: '30px', width: 'auto' }} />
+                <header className="app-header">
+                    <div className="header-brand">
+                        <img src={logoImg} alt="Logo" className="header-logo" />
                         <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '1px' }}>PIXY<span className="text-accent">|</span>NEWS</div>
                         <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>SYS.VER.2.0.4</span>
                     </div>
 
-                    <div className="mono text-secondary" style={{ display: 'flex', gap: '40px' }}>
-                        <span>LAT: 40.7128</span>
-                        <span>LONG: -74.0060</span>
-                        <span className="text-accent" style={{ textShadow: '0 0 5px #00f0ff' }}>LIVE FEED</span>
+                    <div className="header-meta mono text-secondary">
+                        <span>LAT: 46.6242° N</span>
+                        <span>LONG: 8.0414° E</span>
+                        <span>LIVE FEED</span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <span className="mono">SEARCH 🔍</span>
-                        <div style={{ width: '20px', height: '14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}>
-                            <div style={{ width: '100%', height: '2px', background: 'white' }}></div>
-                            <div style={{ width: '100%', height: '2px', background: 'white' }}></div>
-                            <div style={{ width: '100%', height: '2px', background: 'white' }}></div>
+                    <div className="header-search" ref={searchContainerRef}>
+                        {isSearchOpen ? (
+                            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px', animation: 'fadeIn 0.3s' }}>
+                                <input
+                                    type="text"
+                                    placeholder="SEARCH SYSTEM..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    autoFocus
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        borderBottom: '1px solid var(--accent-color)',
+                                        color: 'white',
+                                        fontFamily: 'var(--font-mono)',
+                                        padding: '5px',
+                                        width: '200px',
+                                        outline: 'none'
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setIsSearchOpen(false);
+                                        setSearchQuery('');
+                                    }}
+                                    style={{ color: '#666', fontSize: '1.2rem', cursor: 'pointer' }}
+                                >
+                                    ×
+                                </button>
+                            </form>
+                        ) : (
+                            <button
+                                className="mono search-label"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setIsSearchOpen(true);
+                                }}
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                            >
+                                SEARCH <SearchIcon />
+                            </button>
+                        )}
+
+                        <div
+                            className="hamburger-menu"
+                            onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+                            style={{ width: '20px', height: '14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer', zIndex: 1001, position: 'relative' }}
+                        >
+                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }}></div>
+                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', opacity: isMobileMenuOpen ? 0 : 1 }}></div>
+                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }}></div>
                         </div>
                     </div>
                 </header>
 
+                {/* Mobile Menu Overlay */}
+                <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+                    <div className="mobile-search-container">
+                        <span className="mono text-accent" style={{ marginBottom: '10px', display: 'block' }}>SYSTEM SEARCH</span>
+                        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', borderBottom: '1px solid #333', alignItems: 'center' }}>
+                            <input
+                                type="text"
+                                placeholder="ENTER KEYWORDS..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', padding: '10px 0', outline: 'none', fontFamily: 'var(--font-mono)' }}
+                            />
+                            <button type="submit" style={{ color: '#666', padding: '0 5px' }}><SearchIcon /></button>
+                        </form>
+                    </div>
+                    <div className="mobile-menu-links mono">
+                        <a href="#">LATEST_FEED</a>
+                        <a href="#">ARCHIVE</a>
+                        <a href="#">PROTOCOL</a>
+                        <a href="#">CONTACT</a>
+                    </div>
+                </div>
+
                 {/* Main Hero Grid */}
-                <section style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', minHeight: '80vh', borderBottom: '1px solid var(--grid-color)' }}>
+                <section className="hero-section">
 
                     {/* Left Column */}
-                    <div style={{ padding: '80px 50px', display: 'flex', flexDirection: 'column', justifyContent: 'center', borderRight: '1px solid var(--grid-color)', position: 'relative' }}>
+                    <div className="hero-content">
 
                         {/* Vertical Text Sidebar */}
                         <div className="mono text-secondary" style={{
@@ -78,7 +239,7 @@ function Home() {
                             • BREAKING PROTOCOL
                         </div>
 
-                        <h1 style={{ fontSize: '7rem', lineHeight: '0.9', margin: '0 0 20px 0', textTransform: 'uppercase', letterSpacing: '-2px' }}>
+                        <h1 className="hero-title">
                             GLOBAL<br />SYSTEM<br />
                             <span style={{ color: 'transparent', WebkitTextStroke: '1px white' }}>RESET</span>
                         </h1>
@@ -112,7 +273,7 @@ function Home() {
                     </div>
 
                     {/* Right Column (Image) - Now Clickable */}
-                    <Link to="/blog/synthetic-horizon" className="clickable-image" style={{ position: 'relative', overflow: 'hidden', background: '#050505', borderLeft: '1px solid var(--grid-color)', display: 'block', textDecoration: 'none' }}>
+                    <Link to="/blog/synthetic-horizon" className="hero-image-link clickable-image">
                         <div style={{ width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(0,240,255,0.05) 0%, rgba(0,0,0,0) 50%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <span className="mono text-secondary">[CYBORG_VISUAL_FEED]</span>
                         </div>
@@ -121,109 +282,84 @@ function Home() {
                 </section>
 
                 {/* Stats Row */}
-                <section style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    borderBottom: '1px solid var(--grid-color)',
-                    height: '180px'
-                }}>
-                    <div style={{ padding: '30px 40px', borderRight: '1px solid var(--grid-color)', position: 'relative' }}>
+                <section className="stats-grid">
+                    <div className="stat-item">
                         <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '10px' }}>MARKET_INDEX</div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>14,204.91</div>
+                        <div className="stat-value">14,204.91</div>
                         <div className="text-accent mono" style={{ marginTop: '5px' }}>↗ +2.4%</div>
                     </div>
 
-                    <div style={{ padding: '30px 40px', borderRight: '1px solid var(--grid-color)' }}>
+                    <div className="stat-item">
                         <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '10px' }}>NODES_ACTIVE</div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>8,992</div>
+                        <div className="stat-value">8,992</div>
                         <div className="text-secondary mono" style={{ marginTop: '5px' }}>Global Cluster</div>
                     </div>
 
-                    <div style={{ padding: '30px 40px', borderRight: '1px solid var(--grid-color)', position: 'relative' }}>
+                    <div className="stat-item">
                         <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '10px' }}>DATA_STREAM</div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>402 TB/s</div>
+                        <div className="stat-value">402 TB/s</div>
                         <div className="text-secondary mono" style={{ marginTop: '5px' }}>Encryption: AES-256</div>
                     </div>
 
-                    <div style={{ padding: '30px 40px', position: 'relative' }}>
+                    <div className="stat-item">
                         <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '10px' }}>WEATHER_SAT</div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>24°C</div>
+                        <div className="stat-value">24°C</div>
                         <div className="text-secondary mono" style={{ marginTop: '5px' }}>Sector 7 Clear</div>
                     </div>
                 </section>
 
                 {/* Three Column News Grid */}
-                <section style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', borderBottom: '1px solid var(--grid-color)' }}>
-
-                    {/* Col 1 */}
-                    <div style={{ borderRight: '1px solid var(--grid-color)', paddingBottom: '40px' }}>
-                        <div style={{ height: '300px', background: '#111', position: 'relative', overflow: 'hidden', borderBottom: '1px solid var(--grid-color)' }}>
-                            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(to top, #0a0a0a, #222)', display: 'grid', placeItems: 'center' }}>
-                                <span className="mono text-secondary">[CHIP_MACRO]</span>
+                <section className="news-grid" ref={newsGridRef}>
+                    {filteredNews.length > 0 ? (
+                        filteredNews.map((news) => (
+                            <div key={news.id} className="news-item">
+                                <div className="news-image">
+                                    <div style={{ width: '100%', height: '100%', background: news.bgStyle, display: 'grid', placeItems: 'center' }}>
+                                        {news.customImage ? news.customImage : <span className="mono text-secondary">{news.imagePlaceholder}</span>}
+                                    </div>
+                                </div>
+                                <div className="news-content">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+                                        <span className="mono" style={{ background: '#222', padding: '2px 6px', fontSize: '0.7rem' }}>
+                                            <HighlightText text={news.category} highlight={searchQuery} />
+                                        </span>
+                                        <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>{news.time}</span>
+                                    </div>
+                                    <h3 style={{ fontSize: '1.5rem', lineHeight: '1.2', margin: '0 0 15px 0' }}>
+                                        <HighlightText text={news.title} highlight={searchQuery} />
+                                    </h3>
+                                    <p className="text-secondary" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                                        <HighlightText text={news.excerpt} highlight={searchQuery} />
+                                    </p>
+                                </div>
                             </div>
+                        ))
+                    ) : (
+                        <div style={{ gridColumn: '1 / -1', padding: '60px', textAlign: 'center', color: '#666' }}>
+                            <div className="mono" style={{ fontSize: '1.2rem', marginBottom: '10px' }}>NO_DATA_FOUND</div>
+                            <div>Try adjusting your search query parameters.</div>
                         </div>
-                        <div style={{ padding: '30px 40px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                <span className="mono" style={{ background: '#222', padding: '2px 6px', fontSize: '0.7rem' }}>HARDWARE</span>
-                                <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>14:02 UTC</span>
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', lineHeight: '1.2', margin: '0 0 15px 0' }}>Quantum Chip Throughput Exceeds Theoretical Limits</h3>
-                            <p className="text-secondary" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>Researchers at the Void Institute have successfully stabilized a 1000-qubit processor at room temperature, shattering previous computational barriers.</p>
-                        </div>
-                    </div>
-
-                    {/* Col 2 */}
-                    <div style={{ borderRight: '1px solid var(--grid-color)', paddingBottom: '40px' }}>
-                        <div style={{ height: '300px', background: '#111', position: 'relative', overflow: 'hidden', borderBottom: '1px solid var(--grid-color)' }}>
-                            <div style={{ width: '100%', height: '100%', background: 'radial-gradient(circle, #333 0%, #000 70%)', display: 'grid', placeItems: 'center' }}>
-                                <div style={{ width: '150px', height: '150px', border: '2px solid white', borderRadius: '50%', boxShadow: '0 0 20px white' }}></div>
-                            </div>
-                        </div>
-                        <div style={{ padding: '30px 40px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                <span className="mono" style={{ background: '#222', padding: '2px 6px', fontSize: '0.7rem' }}>NETWORK</span>
-                                <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>13:45 UTC</span>
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', lineHeight: '1.2', margin: '0 0 15px 0' }}>The Great Firewall of Sector 4 Has Fallen</h3>
-                            <p className="text-secondary" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>Unauthorized data streams are flooding the local subnet. Authorities are scrambling to patch the zero-day exploit found in the legacy infrastructure.</p>
-                        </div>
-                    </div>
-
-                    {/* Col 3 */}
-                    <div style={{ paddingBottom: '40px' }}>
-                        <div style={{ height: '300px', background: '#111', position: 'relative', overflow: 'hidden', borderBottom: '1px solid var(--grid-color)' }}>
-                            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #111 0%, #333 100%)', display: 'grid', placeItems: 'center' }}>
-                                <div style={{ width: '60px', height: '80px', border: '5px solid #888', borderRadius: '10px 10px 0 0', borderBottom: 'none' }}></div>
-                                <div style={{ width: '80px', height: '60px', background: '#888', borderRadius: '5px', marginTop: '-40px' }}></div>
-                            </div>
-                        </div>
-                        <div style={{ padding: '30px 40px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                <span className="mono" style={{ background: '#222', padding: '2px 6px', fontSize: '0.7rem' }}>SECURITY</span>
-                                <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>12:10 UTC</span>
-                            </div>
-                            <h3 style={{ fontSize: '1.5rem', lineHeight: '1.2', margin: '0 0 15px 0' }}>Biometric Data Leak Affects 30 Million Androids</h3>
-                            <p className="text-secondary" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>A breach in the central registry has exposed sensitive memory cores. Recall protocols have been initiated for all affected units.</p>
-                        </div>
-                    </div>
+                    )}
                 </section>
 
                 {/* Subscription Section */}
-                <section style={{ padding: '100px 0', borderBottom: '1px solid var(--grid-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                {/* Subscription Section */}
+                <section className="subscription-section">
                     <div className="mono text-accent" style={{ letterSpacing: '4px', fontSize: '0.8rem', marginBottom: '20px' }}>SYSTEM NOTIFICATION</div>
-                    <h2 style={{ fontSize: '3.5rem', textAlign: 'center', margin: '0 0 40px 0', lineHeight: '1' }}>SUBSCRIBE TO<br />THE BLUEPRINT</h2>
-                    <div style={{ display: 'flex', width: '100%', maxWidth: '500px', border: '1px solid #333' }}>
+                    <h2 className="subscription-title">SUBSCRIBE TO<br />THE BLUEPRINT</h2>
+                    <div className="subscription-form">
                         <input type="text" placeholder="ENTER_ID_KEY" style={{ flex: 1, background: 'transparent', border: 'none', padding: '20px', color: 'white', fontFamily: 'var(--font-mono)', outline: 'none' }} />
                         <button style={{ background: 'white', color: 'black', padding: '0 30px', fontWeight: 'bold' }}>CONNECT</button>
                     </div>
                     {/* Decorative Lines */}
-                    <div style={{ position: 'absolute', top: '50%', left: '0', width: '25%', height: '1px', background: 'linear-gradient(to right, transparent, #333)' }}></div>
-                    <div style={{ position: 'absolute', top: '50%', right: '0', width: '25%', height: '1px', background: 'linear-gradient(to left, transparent, #333)' }}></div>
+                    <div className="deco-line left"></div>
+                    <div className="deco-line right"></div>
                 </section>
 
                 {/* Latest Transmissions */}
+                {/* Latest Transmissions */}
                 <section style={{ borderBottom: '1px solid var(--grid-color)' }}>
-                    <div style={{ padding: '20px 40px', borderBottom: '1px solid var(--grid-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="transmissions-header">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div style={{ width: '6px', height: '6px', background: '#00f0ff' }}></div>
                             <span style={{ fontWeight: 'bold', letterSpacing: '1px' }}>LATEST TRANSMISSIONS</span>
@@ -234,9 +370,9 @@ function Home() {
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                    <div className="transmissions-grid">
                         {['INFRASTRUCTURE', 'MANUFACTURING', 'SOFTWARE', 'ORBITAL'].map((tag, i) => (
-                            <div key={i} style={{ padding: '20px', borderRight: i < 3 ? '1px solid var(--grid-color)' : 'none' }}>
+                            <div key={i} className="transmission-item">
                                 <div style={{ height: '120px', background: '#111', marginBottom: '20px', display: 'grid', placeItems: 'center', color: '#333' }}>[IMG_0{i + 1}]</div>
                                 <div className="mono text-accent" style={{ fontSize: '0.6rem', marginBottom: '5px' }}>{tag}</div>
                                 <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>
@@ -251,13 +387,14 @@ function Home() {
                 </section>
 
                 {/* Footer */}
-                <footer style={{ padding: '40px 40px 20px 40px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
+                {/* Footer */}
+                <footer className="app-footer">
+                    <div className="footer-top">
                         <div>
                             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '10px' }}>PIXY<span className="text-accent">|</span>NEWS</div>
                             <div className="text-secondary" style={{ fontSize: '0.8rem', maxWidth: '300px' }}>Architectural grid-based news terminal.<br />Copyright ©2026 System Core. All rights reserved.</div>
                         </div>
-                        <div className="mono text-secondary" style={{ display: 'flex', gap: '30px', fontSize: '0.8rem' }}>
+                        <div className="mono text-secondary footer-links">
                             <a href="#">PROTOCOL</a>
                             <a href="#">MANIFESTO</a>
                             <a href="#">JOIN NETWORK</a>
@@ -266,7 +403,7 @@ function Home() {
                     </div>
 
                     {/* Ticker */}
-                    <div style={{ borderTop: '1px solid #333', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#00f0ff' }} className="mono">
+                    <div className="footer-ticker mono">
                         <span>/// MARKET ALERT: SYNTHETIC ORE DOWN 4.5% ///</span>
                         <span>/// SYSTEM UPDATE: FIREWALL PATCH APPLIED SUCCESSFULLY ///</span>
                         <span>/// WEATHER: ACID RAIN WARNING FOR LOWER DISTRICTS ///</span>

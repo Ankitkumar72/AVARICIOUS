@@ -3,9 +3,18 @@ import './index.css';
 import { Link } from 'react-router-dom';
 import logoImg from './assets/logo.png';
 
+const SearchIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+);
+
 function BlogPost() {
+    const [isMobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
     return (
-        <div className="app-main-wrapper" style={{ width: '100vw', minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+        <div className="app-main-wrapper">
             <div className="app-layout">
                 <div className="corner-marker corner-top-left"></div>
                 <div className="corner-marker corner-top-right"></div>
@@ -13,25 +22,49 @@ function BlogPost() {
                 <div className="corner-marker corner-bottom-right"></div>
 
                 {/* Header */}
-                <header style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '25px 50px',
-                    borderBottom: '1px solid var(--grid-color)',
-                    fontSize: '0.8rem'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <img src={logoImg} alt="Logo" style={{ height: '30px', width: 'auto' }} />
+                {/* Header */}
+                <header className="app-header">
+                    <div className="header-brand">
+                        <img src={logoImg} alt="Logo" className="header-logo" />
                         <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '1px' }}>PIXY<span className="text-accent">|</span>NEWS <span className="mono text-secondary">[ARCHIVE 001]</span></div>
                     </div>
 
-                    <div className="mono text-secondary" style={{ display: 'flex', gap: '40px' }}>
+                    <div className="header-meta mono text-secondary">
                         <span>[ INDEX ]</span>
                         <span className="text-accent">[ ARCHIVE ]</span>
                         <span>[ ABOUT ]</span>
                     </div>
+
+                    {/* Mobile Menu Trigger (Hamburger) */}
+                    <div className="header-search">
+                        <div
+                            className="hamburger-menu"
+                            onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+                            style={{ width: '20px', height: '14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer', zIndex: 1001, position: 'relative' }}
+                        >
+                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }}></div>
+                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', opacity: isMobileMenuOpen ? 0 : 1 }}></div>
+                            <div style={{ width: '100%', height: '2px', background: 'white', transition: '0.3s', transform: isMobileMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }}></div>
+                        </div>
+                    </div>
                 </header>
+
+                {/* Mobile Menu Overlay */}
+                <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+                    <div className="mobile-search-container">
+                        <span className="mono text-accent" style={{ marginBottom: '10px', display: 'block' }}>ARCHIVE SEARCH</span>
+                        <div style={{ display: 'flex', borderBottom: '1px solid #333', alignItems: 'center' }}>
+                            <input type="text" placeholder="SEARCH ARCHIVES..." style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', padding: '10px 0', outline: 'none', fontFamily: 'var(--font-mono)' }} />
+                            <span style={{ color: '#666' }}><SearchIcon /></span>
+                        </div>
+                    </div>
+                    <div className="mobile-menu-links mono">
+                        <Link to="/">RETURN_HOME</Link>
+                        <a href="#">INDEX</a>
+                        <a href="#">ARCHIVE</a>
+                        <a href="#">ABOUT</a>
+                    </div>
+                </div>
 
                 {/* Breadcrumb Section */}
                 <div style={{ padding: '10px 50px', borderBottom: '1px solid var(--grid-color)', fontSize: '0.7rem' }} className="mono text-secondary">
@@ -40,7 +73,7 @@ function BlogPost() {
 
                 {/* Hero Title */}
                 <section style={{ padding: '80px 50px', borderBottom: '1px solid var(--grid-color)' }}>
-                    <h1 style={{ fontSize: '5rem', lineHeight: '0.9', margin: 0, textTransform: 'uppercase' }}>
+                    <h1 className="hero-title" style={{ fontSize: '5rem', margin: 0 }}>
                         THE SYNTHETIC<br />
                         HORIZON<span style={{ color: '#444' }}>:</span><br />
                         AI IN ARCHITECTURE
@@ -49,10 +82,10 @@ function BlogPost() {
                 </section>
 
                 {/* Main Content Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr 250px', minHeight: '800px' }}>
+                <div className="blog-layout">
 
                     {/* Left Sidebar */}
-                    <aside style={{ padding: '40px', borderRight: '1px solid var(--grid-color)' }}>
+                    <aside className="blog-sidebar-left">
                         <div style={{ marginBottom: '40px' }}>
                             <div className="mono text-accent" style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '5px' }}>STATUS : ARCHIVED</div>
                             <div style={{ width: '100%', height: '2px', background: 'var(--accent-color)' }}></div>
@@ -87,74 +120,69 @@ function BlogPost() {
                     <main style={{ padding: '60px', borderRight: '1px solid var(--grid-color)' }}>
 
                         {/* Lead Text */}
-                        <div style={{
-                            borderLeft: '2px solid var(--accent-color)',
-                            paddingLeft: '30px',
-                            fontSize: '1.4rem',
-                            lineHeight: '1.4',
-                            marginBottom: '50px',
-                            color: '#ddd'
-                        }}>
+                        {/* Lead Text */}
+                        <div className="article-lead">
                             Exploring the intersection of generative algorithms and physical space, we question if the blueprint of the future is drawn by hand or hallucinated by code.
                         </div>
 
                         {/* Body Text */}
-                        <div style={{ fontSize: '1rem', lineHeight: '1.8', color: '#aaa', marginBottom: '20px' }}>
-                            <span style={{ float: 'left', fontSize: '3.5rem', lineHeight: '0.8', paddingRight: '10px', fontWeight: 'bold', color: 'white' }}>T</span>
+                        <div className="article-body">
+                            <span className="drop-cap">T</span>
                             he architectural grid has long been the symbol of rational order. From the Roman castrum to the Modernist skyscrapers of Mies van der Rohe, the grid represented control, predictability, and human dominance over the chaos of nature. Today, however, that grid is being re-imagined not by architects, but by neural networks.
                         </div>
 
-                        <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#aaa', marginBottom: '50px' }}>
+                        <p className="article-paragraph">
                             In the heart of the new digital brutalism, we find a paradox. The strict lines of code that govern AI models produce forms that are organic, fluid, and often defy structural logic. <span style={{ color: 'white', textDecoration: 'underline', textDecorationColor: 'var(--accent-color)' }}>Generative design</span> is no longer a tool for optimization but a partner in creation.
                         </p>
 
                         {/* Subheader */}
-                        <h3 style={{ fontSize: '1.2rem', marginBottom: '20px', color: 'white' }}>
+                        <h3 className="article-subheader">
                             <span className="text-accent mono" style={{ marginRight: '10px' }}>[01]</span> THE HALLUCINATED STRUCTURE
                         </h3>
 
-                        <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#aaa', marginBottom: '30px' }}>
+                        <p className="article-paragraph">
                             When we feed architectural archives into a diffusion model, what returns is a ghost. Buildings that look familiar but possess alien geometries. Windows that open into voids, staircases that spiral into non-Euclidean spaces. This is the <strong style={{ color: 'white' }}>Synthetic Horizon</strong>.
                         </p>
 
                         {/* Image Placeholder */}
-                        <div style={{ width: '100%', background: '#111', padding: '20px', marginBottom: '30px', border: '1px solid #333' }}>
-                            <div style={{ width: '100%', height: '250px', background: 'linear-gradient(to bottom right, #222, #000)', display: 'grid', placeItems: 'center' }}>
+                        <div className="article-image-container">
+                            <div className="article-image-placeholder">
                                 <div style={{ width: '50px', height: '50px', background: '#333' }}></div>
                                 <div style={{ width: '80px', height: '80px', background: '#444', transform: 'translate(30px, -20px)' }}></div>
                             </div>
-                            <div className="mono text-secondary" style={{ fontSize: '0.6rem', marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                            <div className="mono text-secondary image-caption">
                                 <span>FIG 1.1 -- CONCRETE DIFFUSION</span>
                                 <span>SIZE: 20MB</span>
                             </div>
                         </div>
 
-                        <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#aaa', marginBottom: '40px' }}>
+                        <p className="article-paragraph">
                             The implication for physical construction is profound. If our tools can dream up structures that ignore gravity, how do we translate them to steel and glass? The answer lies in 3D printing and material science, bridging the gap between the digital hallucination and the tangible world.
                         </p>
 
-                        <h3 style={{ fontSize: '1.2rem', marginBottom: '20px', color: 'white' }}>
+                        {/* Subheader */}
+                        <h3 className="article-subheader">
                             <span className="text-accent mono" style={{ marginRight: '10px' }}>[02]</span> ZERO-POINT METADATA
                         </h3>
 
-                        <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#aaa', marginBottom: '30px' }}>
+                        <p className="article-paragraph">
                             We are moving towards an architecture of information. A building is no longer just shelter; it is a data set. Every beam, every bolt, every lux of light is quantified. In this <span style={{ textDecoration: 'underline' }}>hyper-measured reality</span>, the role of the architect shifts from designer to curator.
                         </p>
 
                         {/* Quote */}
-                        <blockquote style={{ borderLeft: '3px solid var(--accent-color)', margin: '40px 0', paddingLeft: '30px', fontStyle: 'italic', fontSize: '1.1rem', color: 'white' }}>
+                        <blockquote className="article-quote">
                             "The grid is not a prison. It is the lattice upon which the future grows."
                         </blockquote>
 
-                        <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#aaa', marginBottom: '50px' }}>
+                        <p className="article-paragraph">
                             As we stand on this precipice, looking out at a skyline generated by algorithms, we must ask: does the soul of a building reside in the intention of its creator, or in the complexity of its code?
                         </p>
 
-                        <div style={{ width: '100%', height: '1px', background: '#333', marginBottom: '40px' }}></div>
+                        <div className="article-divider"></div>
 
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <div className="mono text-accent" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>NEXT ARTICLE</div>
-                            <Link to="#" style={{ fontSize: '2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                            <Link to="#" className="next-article-link">
                                 DIGITAL DECAY IN VR <span>→</span>
                             </Link>
                         </div>
@@ -162,7 +190,7 @@ function BlogPost() {
                     </main>
 
                     {/* Right Sidebar */}
-                    <aside style={{ padding: '40px' }}>
+                    <aside className="blog-sidebar-right">
                         <div style={{ marginBottom: '30px' }}>
                             <div className="mono text-accent" style={{ fontSize: '0.8rem', marginBottom: '15px' }}>[ RELATED TAGS ]</div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
@@ -181,11 +209,11 @@ function BlogPost() {
                 </div>
 
                 {/* Footer (Simplified) */}
-                <footer style={{ padding: '30px 50px', borderTop: '1px solid var(--grid-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem' }} className="mono">
+                <footer className="footer-simple mono">
                     <div>
                         <strong>PIXY | NEWS</strong> <span className="text-secondary" style={{ marginLeft: '10px' }}>© 2026 PIXY MEDIA GROUP. ALL RIGHTS RESERVED.</span>
                     </div>
-                    <div className="text-secondary" style={{ display: 'flex', gap: '20px' }}>
+                    <div className="text-secondary footer-simple-links">
                         <span>PRIVACY_PROTOCOL</span>
                         <span>TERMS_OF_USE</span>
                         <span>SYSTEM_STATUS</span>
