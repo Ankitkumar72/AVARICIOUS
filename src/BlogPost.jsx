@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './index.css';
 import { Link, useParams } from 'react-router-dom';
 import Header from './Header';
@@ -104,13 +105,9 @@ function BlogPost() {
                     {/* Main Article Content */}
                     <main style={{ padding: '60px', borderRight: '1px solid var(--grid-color)' }}>
 
-                        {/* We are treating content as raw text for now. Markdown rendering would require a library. */}
-                        {/* Splitting paragraphs by double newline for simple formatting */}
-                        {post.content?.split('\n\n').map((paragraph, idx) => (
-                            <p key={idx} className="article-paragraph" style={{ whiteSpace: 'pre-line' }}>
-                                {paragraph}
-                            </p>
-                        ))}
+                        <ReactMarkdown className="markdown-content">
+                            {post.content}
+                        </ReactMarkdown>
 
                         <div className="article-divider"></div>
 

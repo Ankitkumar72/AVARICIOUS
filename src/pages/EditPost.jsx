@@ -13,6 +13,7 @@ const EditPost = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [coordinates, setCoordinates] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
     const [status, setStatus] = useState('IDLE'); // IDLE, SENDING, SUCCESS, ERROR
 
     useEffect(() => {
@@ -37,6 +38,7 @@ const EditPost = () => {
             setTitle(data.title);
             setContent(data.content);
             setCoordinates(data.coordinates || '');
+            setImageUrl(data.image_url || '');
         }
     };
 
@@ -48,6 +50,7 @@ const EditPost = () => {
             title,
             content,
             coordinates,
+            image_url: imageUrl,
             updated_at: new Date().toISOString(),
         };
 
@@ -114,6 +117,25 @@ const EditPost = () => {
                                 value={coordinates}
                                 onChange={(e) => setCoordinates(e.target.value)}
                                 placeholder="e.g. 40.7° N, 74.0° W"
+                                style={{
+                                    width: '100%',
+                                    background: '#111',
+                                    border: '1px solid #333',
+                                    color: 'var(--accent-color)',
+                                    padding: '10px',
+                                    fontFamily: 'var(--font-mono)'
+                                }}
+                            />
+                        </div>
+
+                        {/* Image URL Input */}
+                        <div>
+                            <label className="text-secondary" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '10px' }}>&gt; COVER_IMAGE_URL</label>
+                            <input
+                                type="text"
+                                value={imageUrl}
+                                onChange={(e) => setImageUrl(e.target.value)}
+                                placeholder="https://..."
                                 style={{
                                     width: '100%',
                                     background: '#111',
