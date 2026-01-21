@@ -15,10 +15,7 @@ function BlogPost() {
                 {/* Header */}
                 <Header />
 
-                {/* Breadcrumb Section */}
-                <div style={{ padding: '10px 50px', borderBottom: '1px solid var(--grid-color)', fontSize: '0.7rem' }} className="mono text-secondary">
-                    <Link to="/" style={{ color: 'inherit' }}>HOME</Link> / EDITORIAL / TECH
-                </div>
+
 
                 {/* Hero Title */}
                 <section style={{ padding: '80px 50px', borderBottom: '1px solid var(--grid-color)' }}>

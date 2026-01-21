@@ -85,6 +85,7 @@ const Header = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 autoFocus
+                                className="search-input-field"
                                 style={{
                                     background: 'transparent',
                                     border: 'none',
@@ -92,7 +93,6 @@ const Header = () => {
                                     color: 'white',
                                     fontFamily: 'var(--font-mono)',
                                     padding: '5px',
-                                    width: '200px',
                                     outline: 'none'
                                 }}
                             />
@@ -136,24 +136,11 @@ const Header = () => {
 
             {/* Mobile Menu Overlay */}
             <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
-                <div className="mobile-search-container">
-                    <span className="mono text-accent" style={{ marginBottom: '10px', display: 'block' }}>SYSTEM SEARCH</span>
-                    <form onSubmit={handleSearchSubmit} style={{ display: 'flex', borderBottom: '1px solid #333', alignItems: 'center' }}>
-                        <input
-                            type="text"
-                            placeholder="ENTER KEYWORDS..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', padding: '10px 0', outline: 'none', fontFamily: 'var(--font-mono)' }}
-                        />
-                        <button type="submit" style={{ color: '#666', padding: '0 5px' }}><SearchIcon /></button>
-                    </form>
-                </div>
+
                 <div className="mobile-menu-links mono">
-                    <Link to="/">LATEST_FEED</Link>
-                    <a href="#">ARCHIVE</a>
-                    <a href="#">PROTOCOL</a>
-                    <a href="#">CONTACT</a>
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)}>INDEX</Link>
+                    <Link to="#" onClick={() => setMobileMenuOpen(false)}>ARCHIVE</Link>
+                    <Link to="#" onClick={() => setMobileMenuOpen(false)}>ABOUT</Link>
                 </div>
             </div>
         </>
