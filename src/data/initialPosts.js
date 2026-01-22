@@ -25,5 +25,14 @@ export const initialPosts = [
         content: 'A breach in the central registry has exposed sensitive memory cores. Recall protocols have been initiated for all affected units.\n\n"It is a minor glitch," claims CyberLife spokesperson, despite evidence of memory corruption in older models.',
         image_url: null,
         bgStyle: 'linear-gradient(135deg, #111 0%, #333 100%)'
+    },
+    {
+        id: 'synthetic-horizon',
+        category: 'SYSTEM',
+        updated_at: new Date().toISOString(),
+        title: 'Global System Reset Imminent',
+        content: '## CRITICAL SYSTEM ALERT\n\nThe central core has initiated a mandatory reset sequence. All connected nodes must prepare for immediate temporary disconnection.\n\n### Impact Assessment\n\n*   **Infrastructure**: Power grids in Sector 7 may experience fluctuations.\n*   **Network**: Global data streams will be paused for approximately 420 seconds.\n*   **Protocol**: Maintain secure handshake protocols during reboot.\n\nTechnicians are advising all units to secure their local memory buffers. This is not a drill.',
+        image_url: null,
+        bgStyle: 'linear-gradient(to bottom, #000 0%, #001a1a 100%)'
     }
 ];

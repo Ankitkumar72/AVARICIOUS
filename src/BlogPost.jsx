@@ -4,6 +4,7 @@ import './index.css';
 import { Link, useParams } from 'react-router-dom';
 import Header from './Header';
 import { supabase } from './supabaseClient';
+import { initialPosts } from './data/initialPosts';
 
 function BlogPost() {
     const { id } = useParams();
@@ -22,6 +23,12 @@ function BlogPost() {
 
             if (data) {
                 setPost(data);
+            } else {
+                // FALLBACK: Check local initialPosts
+                const localPost = initialPosts.find(p => p.id.toString() === id);
+                if (localPost) {
+                    setPost(localPost);
+                }
             }
             setLoading(false);
         };
@@ -105,9 +112,11 @@ function BlogPost() {
                     {/* Main Article Content */}
                     <main style={{ padding: '60px', borderRight: '1px solid var(--grid-color)' }}>
 
-                        <ReactMarkdown className="markdown-content">
-                            {post.content}
-                        </ReactMarkdown>
+                        <div className="markdown-content">
+                            <ReactMarkdown>
+                                {post.content}
+                            </ReactMarkdown>
+                        </div>
 
                         <div className="article-divider"></div>
 
