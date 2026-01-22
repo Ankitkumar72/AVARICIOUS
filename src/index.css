@@ -1385,3 +1385,36 @@ button {
         height: auto;
     }
 }
+
+/* Visibility Utilities */
+.desktop-only {
+    display: flex !important;
+}
+
+.mobile-only {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none !important;
+    }
+
+    .mobile-only {
+        display: flex !important;
+    }
+}
+
+@keyframes disintegration {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+        filter: blur(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}

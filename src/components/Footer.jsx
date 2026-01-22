@@ -11,7 +11,7 @@ const Footer = () => {
                 </div>
                 <div className="mono text-secondary footer-links">
                     <Link to="/core-logs">CORE_LOGS</Link>
-                    <a href="#">NEURAL_SYNAPSE</a>
+                    <Link to="/neural-synapse">NEURAL_SYNAPSE</Link>
                     <a href="#">JOIN_NETWORK</a>
                     <a href="#">SYSTEM_INTEGRITY</a>
                 </div>

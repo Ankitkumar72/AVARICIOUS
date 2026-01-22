@@ -11,6 +11,8 @@ const EditPost = lazy(() => import('./pages/EditPost'));
 const Archive = lazy(() => import('./pages/Archive'));
 const About = lazy(() => import('./pages/About'));
 const CoreLogs = lazy(() => import('./pages/CoreLogs'));
+const NeuralSynapse = lazy(() => import('./pages/NeuralSynapse'));
+const JoinNetwork = lazy(() => import('./pages/JoinNetwork'));
 
 // Loading Fallback Component
 const LoadingScreen = () => (
@@ -90,6 +92,22 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<LoadingScreen />}>
         <CoreLogs />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/neural-synapse",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <NeuralSynapse />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/join-network",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <JoinNetwork />
       </Suspense>
     ),
   },

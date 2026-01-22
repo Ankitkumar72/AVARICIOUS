@@ -1,24 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import logoImg from './assets/logo.png';
 import './index.css';
 import NavButton from './NavButton';
-import StatusTicker from './components/StatusTicker';
 
-const SearchIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-);
-
-const Header = ({ minimal = false }) => {
-    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+const Header = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
     const searchContainerRef = useRef(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Sync local state with URL param
     useEffect(() => {
@@ -33,9 +26,6 @@ const Header = ({ minimal = false }) => {
     useEffect(() => {
         function handleClickOutside(event) {
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-                // If we click outside, strictly speaking we might want to just hide the input,
-                // but if there's a query, maybe we want to keep it? 
-                // The previous behavior was just 'close'. Let's stick to that.
                 setIsSearchOpen(false);
             }
         }
@@ -53,118 +43,191 @@ const Header = ({ minimal = false }) => {
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        // Determine where to go
-        // Always navigate to Home with query param
         navigate(`/?q=${encodeURIComponent(searchQuery)}`);
-
-        // On mobile, close menu after search
+        setIsSearchOpen(false);
         setMobileMenuOpen(false);
     };
 
+    const isActive = (path) => location.pathname === path;
+
     return (
         <>
-            <header className="app-header">
-                <div className="header-brand">
-                    <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
-                        <img src={logoImg} alt="Logo" className="header-logo" />
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '1px' }}>PIXY<span className="text-accent">|</span>NEWS</div>
+            <header className="app-header" style={{
+                display: 'flex',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                background: 'black',
+                position: 'sticky',
+                top: 0,
+                zIndex: 100,
+                padding: 0
+            }}>
+                {/* Brand Section */}
+                <div style={{
+                    padding: '20px 40px',
+                    fontWeight: 'bold',
+                    borderRight: '1px solid rgba(255,255,255,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flex: '0 0 auto'
+                }}>
+                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ letterSpacing: '1px' }}>PIXY|NEWS.SYS</span>
                     </Link>
-                    <span className="mono text-secondary header-version">SYS.VER.2.0.4</span>
                 </div>
 
-                <div className="header-meta mono text-secondary">
-                    <span>LAT: 46.6242° N</span>
-                    <span>LONG: 8.0414° E</span>
-                    <span>LIVE FEED</span>
+                {/* Mobile Menu Toggle (Right aligned on mobile via flex-grow or absolute) */}
+                <div className="mobile-only" style={{
+                    marginLeft: 'auto',
+                    padding: '0 20px',
+                    alignItems: 'center',
+                    borderLeft: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                    <NavButton isOpen={isMobileMenuOpen} onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} />
                 </div>
 
-                <div className="header-search" ref={searchContainerRef}>
-                    {!minimal && (
-                        <>
-                            {isSearchOpen ? (
-                                <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px', animation: 'fadeIn 0.3s' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="SEARCH SYSTEM..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        autoFocus
-                                        className="search-input-field"
-                                        style={{
-                                            background: 'transparent',
-                                            border: 'none',
-                                            borderBottom: '1px solid var(--accent-color)',
-                                            color: 'white',
-                                            fontFamily: 'var(--font-mono)',
-                                            padding: '5px',
-                                            outline: 'none'
-                                        }}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setIsSearchOpen(false);
-                                            setSearchQuery('');
-                                            navigate('/');
-                                        }}
-                                        style={{ color: '#666', fontSize: '1.2rem', cursor: 'pointer' }}
-                                    >
-                                        ×
-                                    </button>
-                                </form>
-                            ) : (
-                                <button
-                                    className="mono search-label"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setIsSearchOpen(true);
+                {/* Desktop Navigation Links - Center */}
+                <div className="mono header-nav-links desktop-only" style={{
+                    gap: '30px',
+                    padding: '0 40px',
+                    alignItems: 'center',
+                    fontSize: '0.8rem',
+                    color: '#888',
+                    flex: 1
+                }}>
+                    <Link to="/core-logs" style={{
+                        color: isActive('/core-logs') ? 'white' : '#888',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s'
+                    }}>
+                        CORE_LOGS
+                    </Link>
+                    <Link to="/neural-synapse" style={{
+                        color: isActive('/neural-synapse') ? 'white' : '#888',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s'
+                    }}>
+                        NEURAL_SYNAPSE
+                    </Link>
+                    <Link to="/join-network" style={{
+                        color: isActive('/join-network') ? 'white' : '#888',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s'
+                    }}>
+                        JOIN_NETWORK
+                    </Link>
+                    <Link to="#" style={{
+                        color: '#888',
+                        textDecoration: 'none',
+                        cursor: 'not-allowed',
+                        opacity: 0.7
+                    }} onClick={e => e.preventDefault()}>
+                        ENFORCEMENT_BYPASS
+                    </Link>
+                </div>
+
+                {/* Desktop Right Section: Location/Meta + Search */}
+                <div className="mono desktop-only" style={{
+                    padding: '20px 40px',
+                    fontSize: '0.8rem',
+                    color: '#666',
+                    borderLeft: '1px solid rgba(255,255,255,0.1)',
+                    alignItems: 'center',
+                    gap: '20px'
+                }}>
+                    {/* Search Toggle */}
+                    <div ref={searchContainerRef} style={{ position: 'relative' }}>
+                        {isSearchOpen ? (
+                            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center' }}>
+                                <input
+                                    type="text"
+                                    autoFocus
+                                    value={searchQuery}
+                                    onChange={e => setSearchQuery(e.target.value)}
+                                    placeholder="SEARCH..."
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        borderBottom: '1px solid white',
+                                        color: 'white',
+                                        fontFamily: 'inherit',
+                                        width: '120px',
+                                        fontSize: '0.8rem',
+                                        outline: 'none'
                                     }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                                >
-                                    SEARCH <SearchIcon />
-                                </button>
-                            )}
+                                />
+                                <button type="submit" style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', marginLeft: '5px' }}>→</button>
+                            </form>
+                        ) : (
+                            <button
+                                onClick={() => setIsSearchOpen(true)}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#666',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    fontFamily: 'inherit',
+                                    fontSize: 'inherit'
+                                }}>
+                                [SEARCH]
+                            </button>
+                        )}
+                    </div>
 
-                            <NavButton isOpen={isMobileMenuOpen} onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} />
-                        </>
-                    )}
+                    <span>LOC: 0X88.2.1</span>
                 </div>
             </header>
 
-            {/* Mobile Status Ticker - Visible only on small screens via CSS media query or JS condition */}
-            <div className="mobile-ticker-container">
-                <StatusTicker items={['LAT: 46.6242° N', 'LONG: 8.0414° E', 'SYS.VER.2.0.4', 'LIVE FEED: ACTIVE']} />
-            </div>
-
             {/* Mobile Menu Overlay */}
-            <div
-                className={`menu-backdrop ${isMobileMenuOpen ? 'open' : ''}`}
-                onClick={() => setMobileMenuOpen(false)}
-            ></div>
-            <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
-
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, opacity: 0.1, pointerEvents: 'none', backgroundSize: '30px 30px', backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)' }}></div>
-
-                <div className="menu-header">
-                    <div>
-                        <div className="mono text-accent" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>// PIXY_NEWS_PROTOCOL_V2.0</div>
-                        <div style={{ fontSize: '2rem', fontWeight: 'bold', lineHeight: 1 }}>MAIN MENU</div>
-                    </div>
-                    <NavButton isOpen={true} onClick={() => setMobileMenuOpen(false)} className="menu-close-btn" />
+            <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`} style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100vh',
+                background: 'black',
+                zIndex: 200,
+                flexDirection: 'column',
+                display: isMobileMenuOpen ? 'flex' : 'none'
+            }}>
+                <div style={{
+                    padding: '20px',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                }}>
+                    <span style={{ fontWeight: 'bold' }}>MENU</span>
+                    <NavButton isOpen={isMobileMenuOpen} onClick={() => setMobileMenuOpen(false)} />
                 </div>
 
-                <div className="mobile-menu-links mono">
-                    <div className="mobile-menu-links mono">
-                        <Link to="/" onClick={() => setMobileMenuOpen(false)} className="menu-link-item" style={{ animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0s' }}>
-                            <span className="menu-number text-accent">[01]</span> INDEX
-                        </Link>
-                        <Link to="/archive" onClick={() => setMobileMenuOpen(false)} className="menu-link-item" style={{ animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.1s' }}>
-                            <span className="menu-number text-accent">[02]</span> ARCHIVE
-                        </Link>
-                        <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="menu-link-item" style={{ animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.2s' }}>
-                            <span className="menu-number text-accent">[03]</span> ABOUT
-                        </Link>
+                <div className="mono" style={{ padding: '40px 20px', display: 'flex', flexDirection: 'column', gap: '30px', fontSize: '1.2rem' }}>
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0s' }}>01_HOME</Link>
+                    <Link to="/core-logs" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.1s' }}>02_CORE_LOGS</Link>
+                    <Link to="/neural-synapse" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.2s' }}>03_NEURAL_SYNAPSE</Link>
+                    <Link to="/join-network" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.3s' }}>04_JOIN_NETWORK</Link>
+
+                    <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #333', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.4s' }}>
+                        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ color: '#666' }}>[?]</span>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                placeholder="SEARCH SYSTEM..."
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: 'white',
+                                    fontFamily: 'inherit',
+                                    fontSize: '1rem',
+                                    width: '100%',
+                                    outline: 'none'
+                                }}
+                            />
+                            <button type="submit" style={{ background: 'none', border: 'none', color: 'var(--accent-color)', cursor: 'pointer', fontSize: '1.2rem' }}>→</button>
+                        </form>
                     </div>
                 </div>
             </div>

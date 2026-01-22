@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Header from '../Header';
 
 const SOURCE_LOGS = [
     { msg: 'SYSTEM_INITIALIZATION_COMPLETE', type: 'info' },
@@ -78,26 +79,7 @@ const CoreLogs = () => {
         <div className="app-main-wrapper" style={{ alignItems: 'flex-start', paddingTop: '0' }}>
             <div className="app-layout" style={{ minHeight: '100vh', border: 'none' }}>
 
-                {/* Header */}
-                <div style={{ padding: '20px 40px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#666' }} className="mono">
-                    <div>SYSTEM_REV: 0.9.1</div>
-                    <div>LOCATION: NORTH_VERTEX_A1</div>
-                </div>
-
-                <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ padding: '20px 40px', fontWeight: 'bold', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-                        PIXY|NEWS
-                    </div>
-                    <div className="mono" style={{ display: 'flex', gap: '30px', padding: '20px 40px', fontSize: '0.8rem', color: '#888' }}>
-                        <span style={{ color: 'white' }}>CORE_LOGS</span>
-                        <span>NEURAL_SYNAPSE</span>
-                        <span>JOIN_NETWORK</span>
-                        <span>ENFORCEMENT_BYPASS</span>
-                    </div>
-                    <div className="mono" style={{ marginLeft: 'auto', padding: '20px 40px', fontSize: '0.8rem', color: '#666' }}>
-                        SESSION_ID: PX-0X9821_ALPHA
-                    </div>
-                </div>
+                <Header />
 
                 {/* Main Content Grid with Responsive Classes */}
                 <div className="core-logs-container">
