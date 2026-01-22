@@ -116,12 +116,11 @@ const Header = () => {
                     }}>
                         JOIN_NETWORK
                     </Link>
-                    <Link to="#" style={{
-                        color: '#888',
+                    <Link to="/enforcement-bypass" style={{
+                        color: isActive('/enforcement-bypass') ? 'white' : '#888',
                         textDecoration: 'none',
-                        cursor: 'not-allowed',
-                        opacity: 0.7
-                    }} onClick={e => e.preventDefault()}>
+                        transition: 'color 0.2s'
+                    }}>
                         ENFORCEMENT_BYPASS
                     </Link>
                 </div>
@@ -207,6 +206,7 @@ const Header = () => {
                     <Link to="/core-logs" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.1s' }}>02_CORE_LOGS</Link>
                     <Link to="/neural-synapse" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.2s' }}>03_NEURAL_SYNAPSE</Link>
                     <Link to="/join-network" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.3s' }}>04_JOIN_NETWORK</Link>
+                    <Link to="/enforcement-bypass" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.4s' }}>05_ENFORCEMENT_BYPASS</Link>
 
                     <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #333', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.4s' }}>
                         <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

@@ -13,6 +13,7 @@ const About = lazy(() => import('./pages/About'));
 const CoreLogs = lazy(() => import('./pages/CoreLogs'));
 const NeuralSynapse = lazy(() => import('./pages/NeuralSynapse'));
 const JoinNetwork = lazy(() => import('./pages/JoinNetwork'));
+const EnforcementBypass = lazy(() => import('./pages/EnforcementBypass'));
 
 // Loading Fallback Component
 const LoadingScreen = () => (
@@ -108,6 +109,14 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<LoadingScreen />}>
         <JoinNetwork />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/enforcement-bypass",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <EnforcementBypass />
       </Suspense>
     ),
   },
