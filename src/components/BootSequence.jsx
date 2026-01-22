@@ -1,48 +1,49 @@
 import { useState, useEffect } from 'react';
 
+const BOOT_TEXT = [
+    "INITIALIZING KERNEL...",
+    "LOADING MEMORY MODULES...",
+    "CHECKING BIO-METRICS...",
+    "DECRYPTING NEURAL LINK...",
+    "ESTABLISHING SECURE CONNECTION...",
+    "SYSTEM_READY"
+];
+
 const BootSequence = ({ onComplete }) => {
     const [lines, setLines] = useState([]);
     const [progress, setProgress] = useState(0);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
-    const bootText = [
-        "INITIALIZING KERNEL...",
-        "LOADING MEMORY MODULES...",
-        "CHECKING BIO-METRICS...",
-        "DECRYPTING NEURAL LINK...",
-        "ESTABLISHING SECURE CONNECTION...",
-        "SYSTEM_READY"
-    ];
-
+    // Text Typing Effect
     useEffect(() => {
-        let currentLine = 0;
+        if (currentIndex < BOOT_TEXT.length) {
+            const timeout = setTimeout(() => {
+                setLines(prev => [...prev, BOOT_TEXT[currentIndex]]);
+                setCurrentIndex(prev => prev + 1);
+            }, 300);
+            return () => clearTimeout(timeout);
+        } else {
+            // Sequence complete, wait a bit then unmount
+            const timeout = setTimeout(() => {
+                onComplete();
+            }, 800);
+            return () => clearTimeout(timeout);
+        }
+    }, [currentIndex, onComplete]);
 
-        // Add lines one by one
-        const textInterval = setInterval(() => {
-            if (currentLine < bootText.length) {
-                setLines(prev => [...prev, bootText[currentLine]]);
-                currentLine++;
-            } else {
-                clearInterval(textInterval);
-                setTimeout(onComplete, 800); // Slight delay after completion before unmount
-            }
-        }, 300); // Speed of text appearance
-
-        // Fake progress bar
-        const progressInterval = setInterval(() => {
+    // Progress Bar Effect
+    useEffect(() => {
+        const interval = setInterval(() => {
             setProgress(prev => {
                 if (prev >= 100) {
-                    clearInterval(progressInterval);
+                    clearInterval(interval);
                     return 100;
                 }
-                return prev + 2; // Speed of progress bar
+                return prev + 2;
             });
         }, 40);
-
-        return () => {
-            clearInterval(textInterval);
-            clearInterval(progressInterval);
-        };
-    }, [onComplete]);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="boot-overlay" style={{
@@ -57,7 +58,7 @@ const BootSequence = ({ onComplete }) => {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            color: '#00f0ff', // Cyber cyan
+            color: '#00f0ff',
             fontFamily: 'monospace'
         }}>
             <div style={{ width: '300px' }}>

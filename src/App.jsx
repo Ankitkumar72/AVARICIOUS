@@ -10,6 +10,7 @@ const Login = lazy(() => import('./pages/Login'));
 const EditPost = lazy(() => import('./pages/EditPost'));
 const Archive = lazy(() => import('./pages/Archive'));
 const About = lazy(() => import('./pages/About'));
+const CoreLogs = lazy(() => import('./pages/CoreLogs'));
 
 // Loading Fallback Component
 const LoadingScreen = () => (
@@ -81,6 +82,14 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<LoadingScreen />}>
         <EditPost />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/core-logs",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <CoreLogs />
       </Suspense>
     ),
   },
