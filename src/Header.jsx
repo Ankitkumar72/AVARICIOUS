@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import logoImg from './assets/logo.png';
 import './index.css';
 import NavButton from './NavButton';
+import StatusTicker from './components/StatusTicker';
 
 const SearchIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -131,6 +132,11 @@ const Header = ({ minimal = false }) => {
                 </div>
             </header>
 
+            {/* Mobile Status Ticker - Visible only on small screens via CSS media query or JS condition */}
+            <div className="mobile-ticker-container">
+                <StatusTicker items={['LAT: 46.6242° N', 'LONG: 8.0414° E', 'SYS.VER.2.0.4', 'LIVE FEED: ACTIVE']} />
+            </div>
+
             {/* Mobile Menu Overlay */}
             <div
                 className={`menu-backdrop ${isMobileMenuOpen ? 'open' : ''}`}
@@ -149,16 +155,21 @@ const Header = ({ minimal = false }) => {
                 </div>
 
                 <div className="mobile-menu-links mono">
-                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="menu-link-item">
-                        <span className="menu-number text-accent">[01]</span> INDEX
-                    </Link>
-                    <Link to="#" onClick={() => setMobileMenuOpen(false)} className="menu-link-item">
-                        <span className="menu-number text-accent">[02]</span> ARCHIVE
-                    </Link>
-                    <Link to="#" onClick={() => setMobileMenuOpen(false)} className="menu-link-item">
-                        <span className="menu-number text-accent">[03]</span> ABOUT
-                    </Link>
-
+                    {['INDEX', 'ARCHIVE', 'ABOUT'].map((item, i) => (
+                        <Link
+                            key={item}
+                            to={item === 'INDEX' ? '/' : '#'}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="menu-link-item"
+                            style={{
+                                animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none',
+                                opacity: 0,
+                                animationDelay: `${i * 0.1}s`
+                            }}
+                        >
+                            <span className="menu-number text-accent">[{String(i + 1).padStart(2, '0')}]</span> {item}
+                        </Link>
+                    ))}
                 </div>
             </div>
         </>

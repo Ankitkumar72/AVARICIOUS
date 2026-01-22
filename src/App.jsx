@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { BlogProvider } from './context/BlogContext';
 import './index.css';
@@ -69,8 +69,18 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
     <BlogProvider>
+      <div className="interactive-grid"></div>
       <RouterProvider router={router} />
     </BlogProvider>
   );

@@ -4,6 +4,7 @@ import './index.css' // Global styles
 import { Link, useSearchParams } from 'react-router-dom'
 import Header from './Header'
 import { useBlog } from './context/BlogContext';
+import DataStream from './components/DataStream';
 
 // Helper Component for Highlighting Text
 const HighlightText = ({ text, highlight }) => {
@@ -108,7 +109,7 @@ function Home() {
 
                     {/* Right Column (Image) - Now Clickable */}
                     <Link to="/blog/synthetic-horizon" className="hero-image-link clickable-image">
-                        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(0,240,255,0.05) 0%, rgba(0,0,0,0) 50%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="glass-panel" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <span className="mono text-secondary">[CYBORG_VISUAL_FEED]</span>
                         </div>
                         <div className="mono text-accent" style={{ position: 'absolute', bottom: '30px', right: '30px', fontSize: '0.7rem' }}>IMG_SEQ_001.RAW</div>
@@ -123,10 +124,9 @@ function Home() {
                         <div className="text-accent mono" style={{ marginTop: '5px' }}>↗ +2.4%</div>
                     </div>
 
-                    <div className="stat-item">
-                        <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '10px' }}>NODES_ACTIVE</div>
-                        <div className="stat-value">8,992</div>
-                        <div className="text-secondary mono" style={{ marginTop: '5px' }}>Global Cluster</div>
+                    <div className="stat-item" style={{ padding: '20px' }}>
+                        <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '10px' }}>SYSTEM_LOGS</div>
+                        <DataStream />
                     </div>
 
                     <div className="stat-item">
