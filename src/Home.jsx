@@ -5,6 +5,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import Header from './Header'
 import { useBlog } from './context/BlogContext';
 import DataStream from './components/DataStream';
+import NewsGrid from './components/NewsGrid';
 
 // Helper Component for Highlighting Text
 const HighlightText = ({ text, highlight }) => {
@@ -143,53 +144,7 @@ function Home() {
                 </section>
 
                 {/* News Grid */}
-                <section className="news-grid" ref={newsGridRef}>
-                    {loading ? (
-                        <div style={{ gridColumn: '1 / -1', padding: '60px', textAlign: 'center', color: '#666' }}>
-                            <div className="mono">LOADING_DATA_STREAM...</div>
-                        </div>
-                    ) : filteredNews.length > 0 ? (
-                        filteredNews.map((news) => (
-                            <div key={news.id} className="news-item">
-                                <div className="news-image news-link-wrapper">
-                                    <Link to={`/blog/${news.id}`} style={{ display: 'block', width: '100%', height: '100%', textDecoration: 'none' }}>
-                                        <div style={{ width: '100%', height: '100%', background: news.bgStyle || '#111', display: 'grid', placeItems: 'center', position: 'relative' }}>
-                                            {news.image_url ? (
-                                                <img src={news.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
-                                            ) : (
-                                                <span className="mono text-secondary">[NO_IMG_DATA]</span>
-                                            )}
-                                        </div>
-                                    </Link>
-                                </div>
-                                <div className="news-content">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                        <span className="mono" style={{ background: '#222', padding: '2px 6px', fontSize: '0.7rem' }}>
-                                            <HighlightText text={news.category || 'GENERAL'} highlight={searchQuery} />
-                                        </span>
-                                        <span className="mono text-secondary" style={{ fontSize: '0.7rem' }}>
-                                            {news.updated_at ? new Date(news.updated_at).toLocaleTimeString() : '---'}
-                                        </span>
-                                    </div>
-                                    <h3 style={{ fontSize: '1.5rem', lineHeight: '1.2', margin: '0 0 15px 0' }}>
-                                        <Link to={`/blog/${news.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                            <HighlightText text={news.title} highlight={searchQuery} />
-                                        </Link>
-                                    </h3>
-                                    <p className="text-secondary" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                                        {/* Simple truncate for excerpt */}
-                                        <HighlightText text={news.content?.substring(0, 100) + '...'} highlight={searchQuery} />
-                                    </p>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div style={{ gridColumn: '1 / -1', padding: '60px', textAlign: 'center', color: '#666' }}>
-                            <div className="mono" style={{ fontSize: '1.2rem', marginBottom: '10px' }}>NO_DATA_FOUND</div>
-                            <div>Try adjusting your search query parameters.</div>
-                        </div>
-                    )}
-                </section>
+                <NewsGrid posts={filteredNews} loading={loading} ref={newsGridRef} />
 
                 {/* Subscription Section */}
                 <section className="subscription-section">

@@ -8,6 +8,8 @@ const Home = lazy(() => import('./Home'));
 const BlogPost = lazy(() => import('./BlogPost'));
 const Login = lazy(() => import('./pages/Login'));
 const EditPost = lazy(() => import('./pages/EditPost'));
+const Archive = lazy(() => import('./pages/Archive'));
+const About = lazy(() => import('./pages/About'));
 
 // Loading Fallback Component
 const LoadingScreen = () => (
@@ -39,6 +41,22 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<LoadingScreen />}>
         <BlogPost />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/archive",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <Archive />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/about",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <About />
       </Suspense>
     ),
   },

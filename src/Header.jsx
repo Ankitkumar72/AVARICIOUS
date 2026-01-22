@@ -155,21 +155,17 @@ const Header = ({ minimal = false }) => {
                 </div>
 
                 <div className="mobile-menu-links mono">
-                    {['INDEX', 'ARCHIVE', 'ABOUT'].map((item, i) => (
-                        <Link
-                            key={item}
-                            to={item === 'INDEX' ? '/' : '#'}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="menu-link-item"
-                            style={{
-                                animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none',
-                                opacity: 0,
-                                animationDelay: `${i * 0.1}s`
-                            }}
-                        >
-                            <span className="menu-number text-accent">[{String(i + 1).padStart(2, '0')}]</span> {item}
+                    <div className="mobile-menu-links mono">
+                        <Link to="/" onClick={() => setMobileMenuOpen(false)} className="menu-link-item" style={{ animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0s' }}>
+                            <span className="menu-number text-accent">[01]</span> INDEX
                         </Link>
-                    ))}
+                        <Link to="/archive" onClick={() => setMobileMenuOpen(false)} className="menu-link-item" style={{ animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.1s' }}>
+                            <span className="menu-number text-accent">[02]</span> ARCHIVE
+                        </Link>
+                        <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="menu-link-item" style={{ animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.2s' }}>
+                            <span className="menu-number text-accent">[03]</span> ABOUT
+                        </Link>
+                    </div>
                 </div>
             </div>
         </>

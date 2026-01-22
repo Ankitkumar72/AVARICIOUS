@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap');
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
     --bg-color: #050505;
     --grid-color: rgba(255, 255, 255, 0.05);
@@ -91,6 +95,76 @@ body {
         opacity: 1;
         transform: translateX(0) skewX(0);
         filter: blur(0);
+    }
+}
+
+@keyframes noise-scroll {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 100% 100%;
+    }
+}
+
+.digital-noise {
+    background: repeating-linear-gradient(0deg,
+            transparent 0px,
+            rgba(0, 240, 255, 0.05) 1px,
+            transparent 2px),
+        #050505;
+    background-size: 100% 4px;
+    animation: noise-scroll 0.5s infinite linear;
+    position: relative;
+    overflow: hidden;
+}
+
+.digital-noise::after {
+    content: "NO_SIGNAL";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(0, 240, 255, 0.2);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+}
+
+/* Text Glitch Effect */
+.text-glitch {
+    position: relative;
+}
+
+.group:hover .text-glitch {
+    animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+    color: var(--accent-color);
+}
+
+@keyframes glitch-anim {
+    0% {
+        transform: translate(0)
+    }
+
+    20% {
+        transform: translate(-2px, 2px)
+    }
+
+    40% {
+        transform: translate(-2px, -2px)
+    }
+
+    60% {
+        transform: translate(2px, 2px)
+    }
+
+    80% {
+        transform: translate(2px, -2px)
+    }
+
+    100% {
+        transform: translate(0)
     }
 }
 
