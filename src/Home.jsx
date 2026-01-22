@@ -1,13 +1,12 @@
-
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import './index.css' // Global styles
 import { Link, useSearchParams } from 'react-router-dom'
 import Header from './Header'
 import { useBlog } from './context/BlogContext';
 import DataStream from './components/DataStream';
-
 import NewsGrid from './components/NewsGrid';
 import BootSequence from './components/BootSequence';
+import Footer from './components/Footer';
 
 // Helper Component for Highlighting Text
 const HighlightText = ({ text, highlight }) => {
@@ -36,9 +35,9 @@ function Home() {
     const { posts, loading } = useBlog();
     const [isBooting, setIsBooting] = useState(true);
 
-    const handleBootComplete = () => {
+    const handleBootComplete = useCallback(() => {
         setIsBooting(false);
-    };
+    }, []);
 
     useEffect(() => {
         if (searchQuery && newsGridRef.current) {
@@ -199,34 +198,11 @@ function Home() {
                         </section>
 
                         {/* Footer */}
-                        <footer className="app-footer">
-                            <div className="footer-top">
-                                <div>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '10px' }}>PIXY<span className="text-accent">|</span>NEWS</div>
-                                    <div className="text-secondary" style={{ fontSize: '0.8rem', maxWidth: '300px' }}>Architectural grid-based news terminal.<br />Copyright ©2026 System Core. All rights reserved.</div>
-                                </div>
-                                <div className="mono text-secondary footer-links">
-                                    <a href="#">PROTOCOL</a>
-                                    <a href="#">MANIFESTO</a>
-                                    <a href="#">JOIN NETWORK</a>
-                                    <a href="#">LEGAL</a>
-                                </div>
-                            </div>
-
-                            {/* Ticker */}
-                            <div className="footer-ticker mono">
-                                <span>/// MARKET ALERT: SYNTHETIC ORE DOWN 4.5% ///</span>
-                                <span>/// SYSTEM UPDATE: FIREWALL PATCH APPLIED SUCCESSFULLY ///</span>
-                                <span>/// WEATHER: ACID RAIN WARNING FOR LOWER DISTRICTS ///</span>
-                            </div>
-                        </footer>
+                        <Footer />
 
                     </div>
-
                 </div>
-
             )}
-
         </div>
     );
 }

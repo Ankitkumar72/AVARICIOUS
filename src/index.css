@@ -1340,8 +1340,9 @@ button {
     }
 }
 
-animation: fadeIn 1s ease-in-out;
-width: 100%;
+.fade-in-content {
+    animation: fadeIn 1s ease-in-out;
+    width: 100%;
 }
 
 /* Core Logs Page */
