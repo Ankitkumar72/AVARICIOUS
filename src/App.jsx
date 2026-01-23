@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { BlogProvider } from './context/BlogContext';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import './index.css';
 
 // Lazy load components
@@ -145,6 +146,7 @@ function App() {
     <BlogProvider>
       <div className="interactive-grid"></div>
       <RouterProvider router={router} />
+      <SpeedInsights />
     </BlogProvider>
   );
 }
