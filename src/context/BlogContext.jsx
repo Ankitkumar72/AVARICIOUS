@@ -45,17 +45,10 @@ export const BlogProvider = ({ children }) => {
             if (error) {
                 console.error('Error fetching posts (using fallback):', error);
                 // Keep initialPosts if invalid
-            } else if (data && data.length > 0) {
-                setPosts(data);
-            }
-            // If data is empty array (valid db, no posts), we might want to keep showing fallback? 
-            // Or assume the user deleted everything. Let's show fallback if DB is empty to avoid "broken" look for now.
-            else if (data && data.length === 0) {
-                // For now, let's allow empty DB to show "No Data Found" if they genuinely have a connected DB but no posts.
-                // But typically if they just started, it's safer to keep showing the demo data until they add a post.
-                // Let's stick with: if empty, show fallback? No, that prevents clearing the blog.
-                // Correct logic: if error, show fallback. If success but empty, show empty.
-                setPosts([]);
+            } else if (data) {
+                // Merge DB posts with initialPosts fallback
+                // Priority: DB posts first, then fallback
+                setPosts([...data, ...initialPosts]);
             }
 
         } catch (err) {

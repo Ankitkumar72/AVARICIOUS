@@ -7,7 +7,7 @@ import { supabase } from '../supabaseClient';
 
 const EditPost = () => {
     const { id } = useParams();
-    const { user, getPost } = useBlog(); // Assuming getPost helper exists or we use supabase direct
+    const { user, getPost, fetchPosts } = useBlog(); // Create context link
     const navigate = useNavigate();
 
     const [title, setTitle] = useState('');
@@ -15,6 +15,7 @@ const EditPost = () => {
     const [coordinates, setCoordinates] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [status, setStatus] = useState('IDLE'); // IDLE, SENDING, SUCCESS, ERROR
+    const [lastUploadedPath, setLastUploadedPath] = useState(null); // Track replacement
 
     useEffect(() => {
         if (!user) {
@@ -42,6 +43,45 @@ const EditPost = () => {
         }
     };
 
+    const handleImageUpload = async (file) => {
+        // CLEANUP: If user uploads multiple times, remove the previous "draft" upload to save space
+        if (lastUploadedPath) {
+            await supabase.storage.from('blog_assets').remove([lastUploadedPath]);
+        }
+
+        setStatus('UPLOADING');
+        try {
+            const fileExt = file.name.split('.').pop() || 'png';
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `uploads/${fileName}`;
+
+            const { data, error } = await supabase.storage
+                .from('blog_assets')
+                .upload(filePath, file);
+
+            if (error) throw error;
+
+            // Track this path so we can replace it if they upload again
+            setLastUploadedPath(filePath);
+
+            // Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('blog_assets')
+                .getPublicUrl(filePath);
+
+            setImageUrl(publicUrl);
+            setStatus('IDLE');
+        } catch (error) {
+            console.error('Upload Error:', error);
+            setStatus('ERROR');
+            if (/bucket not found/i.test(error.message) || error.code === '42P01') {
+                alert('STORAGE ERROR: Bucket "blog_assets" not found.\n\nACTION REQUIRED:\n1. Open Supabase SQL Editor.\n2. Run the "src/storage_setup.sql" script.');
+            } else {
+                alert(`Upload Failed: ${error.message}`);
+            }
+        }
+    };
+
     const handlePublish = async () => {
         setStatus('SENDING');
 
@@ -64,10 +104,15 @@ const EditPost = () => {
         if (error) {
             console.error('Transmission Failed:', error);
             setStatus('ERROR');
-            alert(`Error: ${error.message}`);
+            if (error.message.includes('Could not find the table') || error.code === '42P01') {
+                alert('DB ERROR: Table "news_posts" not found.\n\nACTION REQUIRED:\n1. Go to your Supabase Dashboard.\n2. Open the SQL Editor.\n3. Copy/Paste the contents of "src/db_setup.sql" and run it.');
+            } else {
+                alert(`Error: ${error.message}`);
+            }
         } else {
             setStatus('SUCCESS');
             alert('Transmission Successful: Story Synchronized.');
+            fetchPosts(); // REFRESH DATA IMMEDIATELY
             if (!id && data[0]?.id) {
                 navigate(`/editor/${data[0].id}`); // Switch to edit mode for the new post
             }
@@ -128,23 +173,61 @@ const EditPost = () => {
                             />
                         </div>
 
-                        {/* Image URL Input */}
+                        {/* Image URL Input with Upload & Paste */}
                         <div>
-                            <label className="text-secondary" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '10px' }}>&gt; COVER_IMAGE_URL</label>
-                            <input
-                                type="text"
-                                value={imageUrl}
-                                onChange={(e) => setImageUrl(e.target.value)}
-                                placeholder="https://..."
-                                style={{
-                                    width: '100%',
-                                    background: '#111',
-                                    border: '1px solid #333',
-                                    color: 'var(--accent-color)',
-                                    padding: '10px',
-                                    fontFamily: 'var(--font-mono)'
-                                }}
-                            />
+                            <label className="text-secondary" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '10px' }}>&gt; COVER_IMAGE_URL [PASTE_SUPPORTED]</label>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <input
+                                    type="text"
+                                    value={imageUrl}
+                                    onChange={(e) => setImageUrl(e.target.value)}
+                                    onPaste={async (e) => {
+                                        const items = e.clipboardData?.items;
+                                        if (items) {
+                                            for (let i = 0; i < items.length; i++) {
+                                                if (items[i].type.indexOf('image') !== -1) {
+                                                    e.preventDefault();
+                                                    const file = items[i].getAsFile();
+                                                    await handleImageUpload(file);
+                                                }
+                                            }
+                                        }
+                                    }}
+                                    placeholder="https://... OR PASTE IMAGE HERE"
+                                    style={{
+                                        flex: 1,
+                                        background: '#111',
+                                        border: '1px solid #333',
+                                        color: 'var(--accent-color)',
+                                        padding: '10px',
+                                        fontFamily: 'var(--font-mono)'
+                                    }}
+                                />
+                                <label style={{
+                                    cursor: 'pointer',
+                                    background: '#333',
+                                    color: 'white',
+                                    padding: '0 20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.8rem',
+                                    whiteSpace: 'nowrap'
+                                }}>
+                                    {status === 'UPLOADING' ? '...' : 'UPLOAD_FILE'}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            if (e.target.files?.[0]) handleImageUpload(e.target.files[0]);
+                                        }}
+                                        style={{ display: 'none' }}
+                                    />
+                                </label>
+                            </div>
+                            <div className="mono text-secondary" style={{ fontSize: '0.6rem', marginTop: '5px' }}>
+                                HINT: You can copy an image (Ctrl+C) and paste it (Ctrl+V) directly into the box above.
+                            </div>
                         </div>
 
                         {/* Markdown Body */}
