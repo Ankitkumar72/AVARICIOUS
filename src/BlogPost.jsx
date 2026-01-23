@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import './index.css';
 import { Link, useParams } from 'react-router-dom';
 import Header from './Header';
@@ -38,6 +39,30 @@ function BlogPost() {
             fetchPost();
         }
     }, [id]);
+
+    // Add data-labels to table cells for mobile responsiveness
+    useEffect(() => {
+        if (!post) return;
+
+        // Small timeout to ensure DOM is ready after ReactMarkdown renders
+        const timer = setTimeout(() => {
+            const tables = document.querySelectorAll('.markdown-content table');
+            tables.forEach(table => {
+                const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText);
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach((cell, index) => {
+                        if (headers[index]) {
+                            cell.setAttribute('data-label', headers[index]);
+                        }
+                    });
+                });
+            });
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, [post]);
 
     if (loading) {
         return (
@@ -116,7 +141,7 @@ function BlogPost() {
                     <main style={{ padding: '60px', borderRight: '1px solid var(--grid-color)' }}>
 
                         <div className="markdown-content">
-                            <ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {post.content}
                             </ReactMarkdown>
                         </div>
@@ -126,7 +151,7 @@ function BlogPost() {
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <div className="mono text-accent" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>DECRYPT_NEXT_LOG →</div>
                             <Link to="/archive" className="next-article-link">
-                                ACCESS ARCHIVE_LOGS  <span>→</span>
+                                &lt;&lt; REVERT_TO_CORE_LOGS //
                             </Link>
                         </div>
 
@@ -153,7 +178,8 @@ function BlogPost() {
 
                 {/* Footer (Simplified) */}
                 {/* Footer Navigation */}
-                <footer className="footer-simple mono" style={{ display: 'flex', justifyContent: 'center', gap: '40px', padding: '40px', fontSize: '0.8rem', letterSpacing: '1px', flexWrap: 'wrap' }}>
+                {/* Footer Navigation */}
+                <footer className="footer-simple mono flex flex-col md:flex-row justify-center items-center gap-6 md:gap-10 p-10 text-[0.8rem] tracking-widest flex-wrap">
                     <Link to="/core-logs" className="text-secondary hover-accent" style={{ textDecoration: 'none' }}>CORE_LOGS</Link>
                     <Link to="/neural-synapse" className="text-secondary hover-accent" style={{ textDecoration: 'none' }}>NEURAL_SYNAPSE</Link>
                     <Link to="/join-network" className="text-secondary hover-accent" style={{ textDecoration: 'none' }}>JOIN_NETWORK</Link>

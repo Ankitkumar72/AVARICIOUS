@@ -253,7 +253,7 @@ const JoinNetwork = () => {
                     background: 'black',
                     zIndex: 10
                 }} className="mono">
-                    <div>© 2024 PIXY_NETWORKS</div>
+                    <div>© 2052 PIXY_NETWORKS</div>
                     <div style={{ display: 'flex', gap: '40px' }}>
                         <span>ENCRYPTION: AES-256</span>
                         <span>SIGNAL: STABLE</span>

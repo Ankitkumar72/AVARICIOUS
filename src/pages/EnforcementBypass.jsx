@@ -108,7 +108,7 @@ const EnforcementBypass = () => {
 
                         {/* Bottom Info */}
                         <div className="mono" style={{ position: 'absolute', bottom: '20px', left: '60px', fontSize: '0.6rem', color: '#444' }}>
-                            © 2024 PIXY_NETWORKS   SYSTEM_STATUS: NOMINAL
+                            © 2052 PIXY_NETWORKS   SYSTEM_STATUS: NOMINAL
                         </div>
                     </div>
 

@@ -173,9 +173,15 @@ function Home() {
                         <section className="subscription-section">
                             <div className="mono text-accent" style={{ letterSpacing: '4px', fontSize: '0.8rem', marginBottom: '20px' }}>SYSTEM NOTIFICATION</div>
                             <h2 className="subscription-title">SUBSCRIBE TO<br />THE BLUEPRINT</h2>
-                            <div className="subscription-form">
-                                <input type="text" placeholder="ENTER_ID_KEY" style={{ flex: 1, background: 'transparent', border: 'none', padding: '20px', color: 'white', fontFamily: 'var(--font-mono)', outline: 'none' }} />
-                                <button style={{ background: 'white', color: 'black', padding: '0 30px', fontWeight: 'bold' }}>CONNECT</button>
+                            <div className="flex flex-col md:flex-row w-full max-w-[500px] gap-4 md:gap-0 md:border md:border-[#333]">
+                                <input
+                                    type="text"
+                                    placeholder="ENTER_ID_KEY"
+                                    className="flex-1 bg-transparent border border-[#333] md:border-none p-4 md:p-5 text-white font-mono outline-none"
+                                />
+                                <button className="bg-white text-black px-8 py-4 md:py-0 font-bold hover:bg-[#00f0ff] transition-colors">
+                                    CONNECT
+                                </button>
                             </div>
                             {/* Decorative Lines */}
                             <div className="deco-line left"></div>
@@ -209,6 +215,8 @@ function Home() {
                                     </div>
                                 ))}
                             </div>
+
+
                         </section>
 
                         {/* Footer */}

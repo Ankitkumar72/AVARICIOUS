@@ -22,21 +22,16 @@ const Archive = () => {
                 <Header minimal={true} />
 
                 {/* Page Title Section - Terminal Style */}
-                <div style={{
-                    padding: '40px 60px',
-                    borderBottom: '1px solid #222',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
+                {/* Page Title Section - Terminal Style */}
+                <div className="flex flex-col md:flex-row justify-between md:items-center px-6 md:px-[60px] py-8 md:py-[40px] border-b border-[#222] gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-2 h-2 bg-blue-500"></div>
                             <span className="mono text-xs text-secondary">SYSTEM_VIEW: LIST_MODE</span>
                         </div>
-                        <h1 className="hero-title" style={{ fontSize: '3rem', margin: 0, letterSpacing: '-1px' }}>ARCHIVE_LOGS</h1>
+                        <h1 className="hero-title text-4xl md:text-[3rem] tracking-tight m-0">ARCHIVE_LOGS</h1>
                     </div>
-                    <div className="mono text-right text-xs text-secondary leading-loose">
+                    <div className="mono text-left md:text-right text-xs text-secondary leading-loose">
                         <div>SERVER_TIME: 23:42:01 UTC</div>
                         <div>NODE: US-EAST-4</div>
                         <div>CONN_STATUS: SECURE</div>
@@ -76,7 +71,7 @@ const Archive = () => {
 
                 {/* Bottom Bar */}
                 <div className="px-10 py-4 flex justify-between mono text-[0.6rem] text-secondary border-t border-white/5">
-                    <Link to="/" className="hover:text-white"> [ BACK_TO_ROOT ] </Link>
+                    <Link to="/" className="hover:text-white"> &lt;&lt; TERMINATE_UPLINK_&_RETREAT </Link>
                 </div>
             </div>
         </div>

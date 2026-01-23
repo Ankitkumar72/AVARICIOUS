@@ -157,18 +157,10 @@ const SystemIntegrity = () => {
                 </div>
 
                 {/* Footer Bar */}
-                <div style={{
-                    borderTop: '1px solid rgba(255,255,255,0.1)',
-                    padding: '20px 60px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    fontSize: '0.6rem',
-                    color: '#444',
-                    background: 'black',
-                    zIndex: 10
-                }} className="mono">
-                    <div>© 2026 SYSTEM_CORE_INTEGRITY</div>
-                    <div style={{ display: 'flex', gap: '40px' }}>
+                {/* Footer Bar */}
+                <div className="mono border-t border-white/10 px-6 py-6 md:px-[60px] flex flex-col md:flex-row justify-between text-[0.6rem] text-[#444] bg-black z-10 gap-4">
+                    <div>© 2052 SYSTEM_CORE_INTEGRITY</div>
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-10">
                         <span>LAST_CHECK: 0.004s AGO</span>
                         <span>HASH: SHA-512</span>
                         <span>ROOT: LOCKED</span>

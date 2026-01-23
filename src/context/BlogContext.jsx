@@ -36,24 +36,33 @@ export const BlogProvider = ({ children }) => {
 
     const fetchPosts = async () => {
         setLoading(true);
+
+        // Timeout promise to force max 5s load time
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 5000));
+
         try {
-            const { data, error } = await supabase
+            const fetchPromise = supabase
                 .from('news_posts')
                 .select('*')
                 .order('updated_at', { ascending: false });
 
-            if (error) {
-                console.error('Error fetching posts (using fallback):', error);
-                // Keep initialPosts if invalid
-            } else if (data) {
-                // Merge DB posts with initialPosts fallback
-                // Priority: DB posts first, then fallback
-                setPosts([...data, ...initialPosts]);
-            }
+            // Race the fetch against the 5s timer
+            const result = await Promise.race([fetchPromise, timeoutPromise]);
 
+            if (result.timeout) {
+                console.warn("Data fetch timed out (exceeded 5s limit)");
+                // We stop loading. user will see either empty list or whatever state is consistent.
+            } else {
+                const { data, error } = result;
+                if (error) {
+                    console.error('Error fetching posts (using fallback):', error);
+                } else if (data) {
+                    // EXCLUSIVELY use DB posts (User Request: "Show only post which have been posted from Editor")
+                    setPosts(data);
+                }
+            }
         } catch (err) {
             console.error("Supabase Connection Failed:", err);
-            // Fallback remains in state
         }
 
         setLoading(false);

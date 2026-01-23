@@ -116,7 +116,7 @@ const NeuralSynapse = () => {
 
                     {/* Footer Info */}
                     <div className="mono mobile-footer" style={{ position: 'absolute', bottom: '20px', left: '20px', fontSize: '0.6rem', color: '#444' }}>
-                        © PIXY_NEWS_ARCH_GRID_2024
+                        © PIXY_NEWS_ARCH_GRID_2052
                     </div>
                     <div className="mono mobile-footer-right" style={{ position: 'absolute', bottom: '20px', right: '20px', fontSize: '0.6rem', color: '#444' }}>
                         COORD: 34.0522° N, 118.2437° W   OS: PIXY_CORE_v1.0.2
