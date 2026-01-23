@@ -152,15 +152,12 @@ function BlogPost() {
                 </div>
 
                 {/* Footer (Simplified) */}
-                <footer className="footer-simple mono">
-                    <div>
-                        <strong>PIXY | NEWS</strong> <span className="text-secondary" style={{ marginLeft: '10px' }}>© 2052 PIXY MEDIA GROUP. ALL RIGHTS RESERVED.</span>
-                    </div>
-                    <div className="text-secondary footer-simple-links">
-                        <span>PRIVACY_PROTOCOL</span>
-                        <span>TERMS_OF_USE</span>
-                        <span>SYSTEM_STATUS</span>
-                    </div>
+                {/* Footer Navigation */}
+                <footer className="footer-simple mono" style={{ display: 'flex', justifyContent: 'center', gap: '40px', padding: '40px', fontSize: '0.8rem', letterSpacing: '1px', flexWrap: 'wrap' }}>
+                    <Link to="/core-logs" className="text-secondary hover-accent" style={{ textDecoration: 'none' }}>CORE_LOGS</Link>
+                    <Link to="/neural-synapse" className="text-secondary hover-accent" style={{ textDecoration: 'none' }}>NEURAL_SYNAPSE</Link>
+                    <Link to="/join-network" className="text-secondary hover-accent" style={{ textDecoration: 'none' }}>JOIN_NETWORK</Link>
+                    <Link to="/system-integrity" className="text-secondary hover-accent" style={{ textDecoration: 'none' }}>SYSTEM_INTEGRITY</Link>
                 </footer>
 
             </div>
