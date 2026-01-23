@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import logoImg from './assets/logo.png';
 import './index.css';
 import NavButton from './NavButton';
 
@@ -72,6 +71,7 @@ const Header = () => {
                     flex: '0 0 auto'
                 }}>
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <img src="/logo.png" alt="PIXY Logo" style={{ height: '30px', width: 'auto' }} />
                         <span style={{ letterSpacing: '1px' }}>PIXY|NEWS.SYS</span>
                     </Link>
                 </div>
