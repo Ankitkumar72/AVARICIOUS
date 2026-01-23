@@ -1,0 +1,106 @@
+/* Neural Synapse Mobile Layout Overrides - V2 */
+@media (max-width: 900px) {
+
+    /* Main Container: Enable scrolling */
+    .neural-grid-container {
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding-bottom: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 20px;
+    }
+
+    /* SVG Lines: Dim them significantly */
+    .neural-grid-container svg {
+        opacity: 0.15;
+    }
+
+    /* Central Mesh: Move to background/top and scale down */
+    .mobile-scale {
+        position: absolute !important;
+        top: 25% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) scale(0.7) !important;
+        opacity: 0.3;
+        z-index: 0;
+    }
+
+    /* Node Alpha: Top center */
+    .mobile-pos-alpha {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        margin-bottom: 40px;
+        order: 1;
+        z-index: 2;
+    }
+
+    /* Left Panel: Center stack, relative positioning */
+    .mobile-pos-left {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        bottom: auto !important;
+        width: 90% !important;
+        max-width: 350px;
+        margin-bottom: 40px;
+        order: 2;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 20px;
+        backdrop-filter: blur(2px);
+    }
+
+    .mobile-hide-text {
+        display: block !important;
+        /* Show text but maybe smaller */
+        font-size: 0.55rem !important;
+        margin-top: 20px !important;
+    }
+
+    /* Right Panel (Stream): Stack below */
+    .mobile-pos-right {
+        position: relative !important;
+        bottom: auto !important;
+        right: auto !important;
+        top: auto !important;
+        width: 90% !important;
+        max-width: 350px;
+        border-left: none !important;
+        border-top: 1px solid #333;
+        padding-left: 0 !important;
+        padding-top: 20px;
+        margin-bottom: 60px;
+        /* Space for footer */
+        order: 3;
+    }
+
+    /* Signal Mod: Hide or discreetly place */
+    .mobile-pos-signal {
+        display: none !important;
+    }
+
+    /* Hide decorative nodes */
+    .mobile-hide {
+        display: none !important;
+    }
+
+    /* Footer: Adjust position */
+    .neural-grid-container>.mono:last-child {
+        bottom: 10px !important;
+        right: 50% !important;
+        transform: translateX(50%);
+        width: 100%;
+        text-align: center;
+    }
+
+    .neural-grid-container>.mono:nth-last-child(2) {
+        bottom: 30px !important;
+        left: 50% !important;
+        transform: translateX(-50%);
+        width: 100%;
+        text-align: center;
+    }
+}

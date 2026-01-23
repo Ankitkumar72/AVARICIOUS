@@ -1,0 +1,62 @@
+/* Neural Synapse Mobile Scaling Fix */
+@media (max-width: 900px) {
+
+    /* Scale down the center mesh */
+    .mobile-scale {
+        transform: translate(-50%, -50%) scale(0.6) !important;
+    }
+
+    /* Reposition Alpha Node to top center */
+    .mobile-pos-alpha {
+        top: 10% !important;
+        left: 50% !important;
+        transform: translateX(-50%);
+        width: max-content;
+        z-index: 10;
+    }
+
+    /* Move Left Panel to bottom left */
+    .mobile-pos-left {
+        top: auto !important;
+        bottom: 80px;
+        left: 20px !important;
+        width: 180px !important;
+        transform: scale(0.85);
+        transform-origin: bottom left;
+    }
+
+    /* Move Right Panel (Stream) to top right */
+    .mobile-pos-right {
+        bottom: auto !important;
+        top: 80px;
+        right: 0 !important;
+        width: 160px !important;
+        border-left: none !important;
+        border-right: 1px solid #333;
+        padding-left: 0 !important;
+        padding-right: 20px;
+        text-align: right;
+    }
+
+    .mobile-pos-right .stream-header {
+        flex-direction: row-reverse;
+    }
+
+    /* Reposition Signal Mod label */
+    .mobile-pos-signal {
+        top: auto !important;
+        bottom: 150px;
+        right: 20px !important;
+        padding: 5px 15px !important;
+        transform: scale(0.8);
+    }
+
+    /* Hide less critical decorative elements */
+    .mobile-hide {
+        display: none !important;
+    }
+
+    .mobile-hide-text {
+        display: none;
+    }
+}
