@@ -51,7 +51,7 @@ const EditPost = () => {
             content,
             coordinates,
             image_url: imageUrl,
-            updated_at: new Date().toISOString(),
+            updated_at: new Date(new Date().setFullYear(new Date().getFullYear() + 57)).toISOString(),
         };
 
         if (id) payload.id = id;

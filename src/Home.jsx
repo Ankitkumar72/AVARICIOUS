@@ -97,7 +97,7 @@ function Home() {
                                         <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>AUTHOR</div>
                                         <div style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <img src={defaultAuthorImg} alt="Author" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
-                                            <span>Unit 734</span>
+                                            <span>Elias-7</span>
                                         </div>
                                     </div>
                                     <div>

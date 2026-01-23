@@ -89,7 +89,7 @@ function BlogPost() {
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>AUTHOR</div>
                                     <div style={{ fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <img src={defaultAuthorImg} alt="Author" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
-                                        <span>UNIT_ADMIN</span>
+                                        <span>{post.author || 'UNIT_ADMIN'}</span>
                                     </div>
                                 </div>
                                 <div className="meta-item">
@@ -154,7 +154,7 @@ function BlogPost() {
                 {/* Footer (Simplified) */}
                 <footer className="footer-simple mono">
                     <div>
-                        <strong>PIXY | NEWS</strong> <span className="text-secondary" style={{ marginLeft: '10px' }}>© 2026 PIXY MEDIA GROUP. ALL RIGHTS RESERVED.</span>
+                        <strong>PIXY | NEWS</strong> <span className="text-secondary" style={{ marginLeft: '10px' }}>© 2052 PIXY MEDIA GROUP. ALL RIGHTS RESERVED.</span>
                     </div>
                     <div className="text-secondary footer-simple-links">
                         <span>PRIVACY_PROTOCOL</span>

@@ -7,7 +7,7 @@ const Footer = () => {
             <div className="footer-top">
                 <div>
                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '10px' }}>PIXY<span className="text-accent">|</span>NEWS</div>
-                    <div className="text-secondary" style={{ fontSize: '0.8rem', maxWidth: '300px' }}>Architectural grid-based news terminal.<br />Copyright ©2026 System Core. All rights reserved.</div>
+                    <div className="text-secondary" style={{ fontSize: '0.8rem', maxWidth: '300px' }}>Architectural grid-based news terminal.<br />Copyright ©2052 System Core. All rights reserved.</div>
                 </div>
                 <div className="mono text-secondary footer-links">
                     <Link to="/core-logs">CORE_LOGS</Link>
