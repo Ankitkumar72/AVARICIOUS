@@ -1497,3 +1497,17 @@ button {
         filter: blur(0);
     }
 }
+
+/* Responsive Footer Fix */
+@media (max-width: 900px) {
+    .responsive-footer {
+        flex-direction: column !important;
+        gap: 15px !important;
+        align-items: flex-start !important;
+        height: auto !important;
+    }
+
+    .responsive-footer>div:first-child {
+        flex-wrap: wrap !important;
+    }
+}

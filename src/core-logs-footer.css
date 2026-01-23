@@ -1,0 +1,46 @@
+/* Core Logs Footer */
+.core-logs-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #444;
+}
+
+.footer-status-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-latency {
+    margin-left: 20px;
+}
+
+.footer-copyright {
+    text-align: right;
+}
+
+@media (max-width: 768px) {
+    .core-logs-footer {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+        text-align: center;
+        padding: 30px 20px;
+    }
+
+    .footer-status-group {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .footer-latency {
+        margin-left: 0;
+    }
+
+    .footer-copyright {
+        text-align: center;
+    }
+}

@@ -87,15 +87,16 @@ const CoreLogs = () => {
                     {/* Left: Logs (Fixed Height, No Scroll, Top Aligned) */}
                     <div className="core-logs-list" style={{ overflow: 'hidden' }}>
                         {logs.map((log, i) => (
-                            <div key={i} style={{ marginBottom: '8px', display: 'flex', gap: '20px' }}>
-                                <span style={{ color: '#666' }}>[{log.time}]</span>
+                            <div key={i} className="core-log-entry">
+                                <span className="log-timestamp">[{log.time}]</span>
                                 <span style={{
                                     color: log.type === 'error' ? '#ff3333' :
                                         log.type === 'success' ? '#00ff00' :
                                             log.type === 'warning' ? '#ffcc00' :
                                                 log.type === 'alert' ? 'white' :
                                                     log.type === 'dim' ? '#444' : '#aaa',
-                                    fontWeight: log.type === 'alert' ? 'bold' : 'normal'
+                                    fontWeight: log.type === 'alert' ? 'bold' : 'normal',
+                                    wordBreak: 'break-word'
                                 }}>
                                     {log.msg}
                                 </span>
@@ -171,7 +172,8 @@ const CoreLogs = () => {
                 </div>
 
                 {/* Footer Bar */}
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#444' }} className="mono">
+                {/* Footer Bar */}
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#444' }} className="mono responsive-footer">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00ff00' }}></div>
                         <span style={{ color: '#666' }}>NETWORK_ONLINE</span>
