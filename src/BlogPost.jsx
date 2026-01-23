@@ -4,6 +4,7 @@ import './index.css';
 import { Link, useParams } from 'react-router-dom';
 import Header from './Header';
 import { supabase } from './supabaseClient';
+import defaultAuthorImg from './assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 import { initialPosts } from './data/initialPosts';
 
 function BlogPost() {
@@ -86,7 +87,10 @@ function BlogPost() {
                             <div className="mono sidebar-meta-list">
                                 <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>AUTHOR</div>
-                                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>UNIT_ADMIN</div>
+                                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <img src={defaultAuthorImg} alt="Author" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
+                                        <span>UNIT_ADMIN</span>
+                                    </div>
                                 </div>
                                 <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>TIMESTAMP (UTC)</div>
@@ -103,9 +107,8 @@ function BlogPost() {
                             </div>
                         </div>
 
-                        <div className="sidebar-map">
-                            {/* Map Placeholder */}
-                            <div style={{ width: '100%', height: '100%', opacity: 0.2, background: 'repeating-linear-gradient(45deg, #222 0px, #222 10px, #111 10px, #111 20px)' }}></div>
+                        <div className="sidebar-map" style={{ overflow: 'hidden' }}>
+                            <img src={defaultAuthorImg} alt="Author Location" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
                         </div>
                     </aside>
 

@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import './index.css' // Global styles
 import { Link, useSearchParams } from 'react-router-dom'
 import Header from './Header'
+import cyborgFeedImg from './assets/ai-generated-8343518_1920.jpg';
+import defaultAuthorImg from './assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 import { useBlog } from './context/BlogContext';
 import DataStream from './components/DataStream';
 import NewsGrid from './components/NewsGrid';
@@ -93,7 +95,10 @@ function Home() {
                                 <div style={{ display: 'flex', gap: '60px', marginTop: '60px', paddingTop: '40px', borderTop: '1px solid var(--grid-color)', width: '100%' }}>
                                     <div>
                                         <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>AUTHOR</div>
-                                        <div style={{ fontSize: '1.1rem' }}>Unit 734</div>
+                                        <div style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <img src={defaultAuthorImg} alt="Author" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
+                                            <span>Unit 734</span>
+                                        </div>
                                     </div>
                                     <div>
                                         <div className="mono text-secondary" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>READ TIME</div>
@@ -118,9 +123,18 @@ function Home() {
                             </div>
 
                             {/* Right Column (Image) - Now Clickable */}
-                            <Link to="/blog/synthetic-horizon" className="hero-image-link clickable-image">
-                                <div className="glass-panel" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <span className="mono text-secondary">[CYBORG_VISUAL_FEED]</span>
+                            <Link to="/blog/synthetic-horizon" className="hero-image-link clickable-image" style={{ overflow: 'hidden', position: 'relative' }}>
+                                <div className="glass-panel" style={{ width: '100%', height: '100%', padding: 0 }}>
+                                    <img src={cyborgFeedImg} alt="Cyborg Visual Feed" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%)',
+                                        pointerEvents: 'none'
+                                    }}></div>
                                 </div>
                                 <div className="mono text-accent" style={{ position: 'absolute', bottom: '30px', right: '30px', fontSize: '0.7rem' }}>IMG_SEQ_001.RAW</div>
                             </Link>

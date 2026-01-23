@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import defaultAuthorImg from '../assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 
 const NewsGrid = ({ posts, loading }) => {
     if (loading) {
@@ -53,7 +54,10 @@ const NewsGrid = ({ posts, loading }) => {
                     {/* Content */}
                     <div className="flex flex-1 flex-col p-5">
                         <div className="mb-3 flex items-center justify-between text-[10px] font-mono text-secondary">
-                            <span>ID: {String(news.id).toUpperCase().slice(0, 8)}</span>
+                            <div className="flex items-center gap-2">
+                                <img src={defaultAuthorImg} alt="Author" className="w-5 h-5 rounded-full object-cover" />
+                                <span>ID: {String(news.id).toUpperCase().slice(0, 8)}</span>
+                            </div>
                             <span>{news.updated_at ? new Date(news.updated_at).toLocaleDateString() : 'N/A'}</span>
                         </div>
 
