@@ -124,7 +124,7 @@ function BlogPost() {
                         <div className="article-divider"></div>
 
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div className="mono text-accent" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>NEXT ARTICLE</div>
+                            <div className="mono text-accent" style={{ fontSize: '0.7rem', marginBottom: '5px' }}>DECRYPT_NEXT_LOG →</div>
                             <Link to="/" className="next-article-link">
                                 RETURN TO INDEX <span>→</span>
                             </Link>
