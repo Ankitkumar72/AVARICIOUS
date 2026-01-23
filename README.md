@@ -1,108 +1,78 @@
+# PIXY|NEWS.SYS
 
----
+A futuristic, cyberpunk-themed news and data archival system.
 
-# Pixy - Modern News & Magazine Portal
+## 🚀 Overview
 
-**Pixy** is a high-end, responsive news and magazine landing page built with React. It features a dark-themed, sleek UI/UX designed for modern content consumption, including categorized news sections, trending sidebars, and breaking news tickers.
+**PIXY|NEWS.SYS** is a specialized front-end application designed to mimic a high-tech terminal interface. It serves as a news portal but operates like a system core, featuring "Core Logs," "System Integrity" checks, and an "Enforcement Bypass" module. It is powered by **React** (Vite) and backed by **Supabase** for real-time data and storage.
 
-## 🚀 Features
+## ✨ Features
 
-* **Dynamic Hero Section:** Featured article with high-impact visuals and spatial computing focus.
-* **Breaking News Ticker:** A scrolling marquee for real-time headlines.
-* **Categorized Grid:** Dedicated sections for Technology, Food, Health, Business, Finance, Entertainment, and Lifestyle.
-* **Trending Sidebar:** A ranked list of the most popular articles with thumbnails and metadata.
-* **Newsletter Subscription:** Integrated call-to-action for user engagement.
-* **Dark Mode UI:** Optimized for readability and a premium aesthetic.
-* **Fully Responsive:** Designed to look great on desktops, tablets, and mobile devices.
+*   **Terminal Interface**: Custom CSS and animations (`scanlines`, `glitch` effects) to simulate a CRT monitor environment.
+*   **Dynamic Blog Engine**: All logs/articles are stored in a database and rendered using Markdown (supports tables, code blocks, and images).
+*   **System Integrity Module**: A dashboard visualizing real-time system metrics, threat levels, and module status.
+*   **Admin Editor**: A protected `/editor` route that allows authorized users ("Unit Admins") to write, format, and upload new logs directly to the live site.
+*   **Secure Auth**: Restricts access to sensitive areas using Supabase Authentication.
+*   **Responsive Design**: Fully optimized for mobile devices (includes custom grid tables and touch-friendly navigation).
 
 ## 🛠️ Tech Stack
 
-* **Frontend:** React.js
-* **Styling:** Tailwind CSS (or CSS Modules)
-* **Icons:** Lucide React / Heroicons
-* **Animations:** Framer Motion (recommended for the news ticker and card hover effects)
-* **Deployment:** Vercel / Netlify
-
-## 📁 Project Structure
-
-```text
-src/
-├── components/
-│   ├── Navbar/            # Logo, Navigation links, Search, and Auth
-│   ├── BreakingNews/      # The scrolling news ticker
-│   ├── HeroSection/       # Main feature card (VR Office setup)
-│   ├── Sidebar/           # Trending News 01-05
-│   ├── ArticleCard/       # Reusable card component for grid items
-│   ├── Newsletter/        # Email signup section
-│   └── Footer/            # Brand info and legal links
-├── assets/                # Images and brand icons
-├── data/                  # Mock JSON data for articles
-├── App.js                 # Main layout assembly
-└── index.css              # Global styles and Tailwind imports
-
-```
+*   **Framework**: React 18 + Vite
+*   **Language**: JavaScript (ES6+)
+*   **Styling**: Tailwind CSS + Custom CSS Variables
+*   **Database**: Supabase (PostgreSQL)
+*   **Storage**: Supabase Storage (for asset uploads)
+*   **Routing**: React Router DOM v6+
+*   **Markdown**: `react-markdown` + `remark-gfm`
 
 ## ⚙️ Installation & Setup
 
-1. **Clone the repository:**
-```bash
-git clone https://github.com/your-username/Pixy-news.git
-cd Pixy-news
+1.  **Clone the Repository**
+    ```bash
+    git clone <your-repo-url>
+    cd Blog-Begining
+    ```
 
-```
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
+3.  **Configure Environment Variables**
+    Create a `.env` file in the root directory and add your Supabase credentials:
+    ```env
+    VITE_SUPABASE_URL=your_supabase_project_url
+    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
 
-2. **Install dependencies:**
-```bash
-npm install
+4.  **Database Setup (First Time Only)**
+    If you are setting this up largely from scratch, you need to initialize the Supabase tables.
+    *   Go to your Supabase Dashboard -> SQL Editor.
+    *   Run the content of `src/db_setup.sql` to create the `news_posts` table.
+    *   Run the content of `src/storage_setup.sql` to create the `blog_assets` bucket.
 
-```
+5.  **Run Locally**
+    ```bash
+    npm run dev
+    ```
+    Access the system at `http://localhost:5173`.
 
+## 📦 Deployment
 
-3. **Start the development server:**
-```bash
-npm start
+This project is optimized for **Vercel**.
 
-```
+1.  Push your code to GitHub.
+2.  Import the project into Vercel.
+3.  **Crucial**: Add your `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to Vercel's "Environment Variables" settings.
+4.  Deploy.
 
+*(See `DEPLOYMENT_GUIDE.md` for a detailed walkthrough)*
 
-4. **Build for production:**
-```bash
-npm run build
+## 🛡️ Security
 
-```
-
-
-
-## 📝 Components Guide
-
-### Navbar
-
-Includes a theme toggle (light/dark mode), search functionality, and authentication buttons (Sign in / Sign up).
-
-### Hero Section
-
-Displays the primary story. Based on the design, it utilizes a large image background with a glassmorphism overlay for the article details.
-
-### Trending News Sidebar
-
-Maps through an array of "trending" objects. Each item includes a rank number, thumbnail, category, title, and "time to read" metadata.
-
-### Article Grid
-
-A flexible CSS Grid layout that displays cards with specific category tags (e.g., `BUSINESS`, `FINANCE`).
-
-## 🎨 Design Specifications
-
-* **Primary Background:** `#121926` (Deep Navy/Dark Gray)
-* **Accent Color (Buttons/Tags):** Cyan/Teal (`#00C2CB`)
-* **Typography:** Modern Sans-serif (Inter, Montserrat, or Roboto)
-* **Card Radius:** `12px` - `16px` for a soft, modern feel.
+*   **RLS Policies**: The database is configured with Row Level Security. Public users can read logs, but only authenticated users can modify them (configure this in Supabase policies).
+*   **Route Protection**: The `/editor` page checks for a valid session token before loading.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
-
----
-
-*Developed with ❤️ by Pixy .*
+Restricted System Access. © 2052 PIXY_NETWORKS.
