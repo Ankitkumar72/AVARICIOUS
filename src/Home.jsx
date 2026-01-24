@@ -30,6 +30,8 @@ const HighlightText = ({ text, highlight }) => {
     );
 };
 
+import { supabase } from './supabaseClient'; // Add this import
+
 function Home() {
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('q') || '';
@@ -41,14 +43,38 @@ function Home() {
         setIsBooting(false);
     }, []);
 
-    const [subscriptionStatus, setSubscriptionStatus] = useState('idle'); // idle, connecting, subscribed
+    const [subscriptionStatus, setSubscriptionStatus] = useState('idle'); // idle, connecting, subscribed, error
+    const [email, setEmail] = useState('');
 
-    const handleSubscribe = () => {
+    const handleSubscribe = async () => {
+        if (!email || !email.includes('@')) {
+            alert("INVALID_SIGNAL: Please enter a valid frequency (email).");
+            return;
+        }
+
         setSubscriptionStatus('connecting');
-        // Simulate API call
-        setTimeout(() => {
-            setSubscriptionStatus('subscribed');
-        }, 1500);
+
+        try {
+            const { error } = await supabase
+                .from('subscribers')
+                .insert([{ email, status: 'active' }]);
+
+            if (error) {
+                if (error.code === '23505') { // Unique violation
+                    // Treat as success or show "ALREADY_CONNECTED"
+                    setSubscriptionStatus('subscribed');
+                } else {
+                    console.error('Subscription error:', error);
+                    alert("CONNECTION_FAILED: Signal interference detected.");
+                    setSubscriptionStatus('idle');
+                }
+            } else {
+                setSubscriptionStatus('subscribed');
+            }
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            setSubscriptionStatus('idle');
+        }
     };
 
     useEffect(() => {
@@ -190,14 +216,18 @@ function Home() {
                                     <div className="text-gray-400 font-mono text-xs mt-2">WELCOME TO THE GRID</div>
                                 </div>
                             ) : (
-                                <div className="flex flex-col md:flex-row w-full max-w-[500px] gap-4 md:gap-0 md:border md:border-[#333]">
+                                <div className="flex flex-col md:flex-row w-full max-w-[500px] gap-4 md:gap-0 md:border md:border-[#333] relative z-10">
                                     <input
-                                        type="text"
+                                        type="email"
                                         placeholder="ENTER_ID_KEY"
                                         className="flex-1 bg-transparent border border-[#333] md:border-none p-4 md:p-5 text-white font-mono outline-none"
                                         disabled={subscriptionStatus === 'connecting'}
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
                                     />
                                     <button
+                                        type="button"
                                         onClick={handleSubscribe}
                                         disabled={subscriptionStatus === 'connecting'}
                                         className="bg-white text-black px-8 py-4 md:py-0 font-bold hover:bg-[#00f0ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
