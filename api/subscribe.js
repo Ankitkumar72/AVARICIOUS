@@ -88,6 +88,7 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('Subscription Endpoint Error:', error);
-        return res.status(500).json({ error: error.message });
+        const userUsed = process.env.GMAIL_USER || 'undefined';
+        return res.status(500).json({ error: `${error.message} (Attempted User: ${userUsed})` });
     }
 }
