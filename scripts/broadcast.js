@@ -61,7 +61,7 @@ async function initiateWeeklyUplink() {
         // Assuming 'to' works for now as requested, but adding a note.
 
         await resend.emails.send({
-            from: 'Elias-7 <uplink@anshnanda.me>', // Updated to match likely domain or use user's verified sender
+            from: 'onboarding@resend.dev', // Default testing domain (Only sends to YOUR email)
             to: emailList,
             subject: `[SIGNAL_BURST] Weekly Archive: ${new Date().toLocaleDateString()}`,
             html: `
