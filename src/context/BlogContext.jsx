@@ -37,11 +37,19 @@ export const BlogProvider = ({ children }) => {
     const fetchPosts = async () => {
         setLoading(true);
 
+        // Safety Timeout: If DB hangs for > 8 seconds, stop loading so UI doesn't freeze.
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request timed out')), 8000)
+        );
+
         try {
-            const { data, error } = await supabase
+            const fetchPromise = supabase
                 .from('news_posts')
                 .select('*')
                 .order('updated_at', { ascending: false });
+
+            // specific check for 8s timeout vs fetch
+            const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
             if (error) {
                 console.error('Error fetching posts:', error);
@@ -50,7 +58,8 @@ export const BlogProvider = ({ children }) => {
             }
 
         } catch (err) {
-            console.error("Supabase Connection Failed:", err);
+            console.error("Fetch failed or timed out:", err);
+            // Fallback is already in 'posts' state (initialPosts)
         }
 
         setLoading(false);
