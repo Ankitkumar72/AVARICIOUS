@@ -67,7 +67,8 @@ function Home() {
             } else {
                 const data = await response.json();
                 console.error('Subscription error:', data);
-                alert("CONNECTION_FAILED: Signal interference detected.");
+                // Show the actual error for debugging
+                alert(`CONNECTION_FAILED: ${data.error || 'Signal interference detected.'}`);
                 setSubscriptionStatus('idle');
             }
         } catch (err) {
