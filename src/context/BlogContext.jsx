@@ -37,23 +37,38 @@ export const BlogProvider = ({ children }) => {
     const fetchPosts = async () => {
         setLoading(true);
 
-        // User Request: "make sure loading... comes and after 5 seconds the logs show up"
-        // We force a MINIMUM wait of 5 seconds.
-        const delayPromise = new Promise((resolve) => setTimeout(resolve, 5000));
+        const MIN_LOADING_TIME = 5000;
+        const MAX_LOADING_TIME = 10000; // Force stop after 10s
 
-        try {
-            const fetchPromise = supabase
+        // 1. Minimum Wait Promise
+        const delayPromise = new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME));
+
+        // 2. Fetch Promise with Timeout Race
+        const fetchWithTimeout = new Promise((resolve, reject) => {
+            // Real fetch
+            supabase
                 .from('news_posts')
                 .select('*')
-                .order('updated_at', { ascending: false });
+                .order('updated_at', { ascending: false })
+                .then(res => resolve(res))
+                .catch(err => reject(err));
 
-            // Wait for BOTH the 5s timer AND the fetch to complete
-            const [_, result] = await Promise.all([delayPromise, fetchPromise]);
+            // Timeout fallback
+            setTimeout(() => {
+                console.warn("Fetch timed out. Using fallback.");
+                resolve({ data: null, error: 'Timeout' });
+            }, MAX_LOADING_TIME);
+        });
+
+        try {
+            // Wait for both (Min wait + Fetch/Timeout)
+            const [_, result] = await Promise.all([delayPromise, fetchWithTimeout]);
 
             const { data, error } = result;
 
             if (error) {
                 console.error('Error fetching posts:', error);
+                // Keep initialPosts on error
             } else if (data) {
                 setPosts(data);
             }
