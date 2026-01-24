@@ -2,7 +2,10 @@ import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 
 // Initialize Supabase
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabase = createClient(
+    process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+);
 
 // Initialize Nodemailer
 const transporter = nodemailer.createTransport({
