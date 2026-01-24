@@ -42,7 +42,7 @@ async function initiateWeeklyUplink() {
         const logContent = logs.map(log => `
       <h3>[LOG ${log.id}]: ${log.title}</h3>
       <p>${log.content ? log.content.substring(0, 300) : 'No content'}...</p>
-      <a href="https://your-site.com/blog/${log.id}">READ_FULL_TRANSMISSION</a>
+      <a href="https://pixy-news.vercel.app/blog/${log.id}">READ_FULL_TRANSMISSION</a>
       <hr>
     `).join('');
 
