@@ -37,38 +37,14 @@ export const BlogProvider = ({ children }) => {
     const fetchPosts = async () => {
         setLoading(true);
 
-        const MIN_LOADING_TIME = 5000;
-        const MAX_LOADING_TIME = 10000; // Force stop after 10s
-
-        // 1. Minimum Wait Promise
-        const delayPromise = new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME));
-
-        // 2. Fetch Promise with Timeout Race
-        const fetchWithTimeout = new Promise((resolve, reject) => {
-            // Real fetch
-            supabase
+        try {
+            const { data, error } = await supabase
                 .from('news_posts')
                 .select('*')
-                .order('updated_at', { ascending: false })
-                .then(res => resolve(res))
-                .catch(err => reject(err));
-
-            // Timeout fallback
-            setTimeout(() => {
-                console.warn("Fetch timed out. Using fallback.");
-                resolve({ data: null, error: 'Timeout' });
-            }, MAX_LOADING_TIME);
-        });
-
-        try {
-            // Wait for both (Min wait + Fetch/Timeout)
-            const [_, result] = await Promise.all([delayPromise, fetchWithTimeout]);
-
-            const { data, error } = result;
+                .order('updated_at', { ascending: false });
 
             if (error) {
                 console.error('Error fetching posts:', error);
-                // Keep initialPosts on error
             } else if (data) {
                 setPosts(data);
             }
