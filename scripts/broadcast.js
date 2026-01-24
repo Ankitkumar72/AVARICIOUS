@@ -25,7 +25,7 @@ async function initiateWeeklyUplink() {
 
         // 2. Fetch the latest stories (Adjust 'limit' based on your 2-3 posts/week)
         const { data: logs, error: logError } = await supabase
-            .from('logs')
+            .from('news_posts') // Corrected table name
             .select('*')
             .order('created_at', { ascending: false })
             .limit(3);
@@ -41,8 +41,8 @@ async function initiateWeeklyUplink() {
         const emailList = subscribers.map(s => s.email);
         const logContent = logs.map(log => `
       <h3>[LOG ${log.id}]: ${log.title}</h3>
-      <p>${log.content.substring(0, 300)}...</p>
-      <a href="https://your-site.com/logs/${log.slug}">READ_FULL_TRANSMISSION</a>
+      <p>${log.content ? log.content.substring(0, 300) : 'No content'}...</p>
+      <a href="https://your-site.com/blog/${log.id}">READ_FULL_TRANSMISSION</a>
       <hr>
     `).join('');
 
