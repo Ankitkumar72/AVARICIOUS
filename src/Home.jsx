@@ -55,21 +55,20 @@ function Home() {
         setSubscriptionStatus('connecting');
 
         try {
-            const { error } = await supabase
-                .from('subscribers')
-                .insert([{ email, status: 'active' }]);
+            // Call the Vercel Serverless Function
+            const response = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
 
-            if (error) {
-                if (error.code === '23505') { // Unique violation
-                    // Treat as success or show "ALREADY_CONNECTED"
-                    setSubscriptionStatus('subscribed');
-                } else {
-                    console.error('Subscription error:', error);
-                    alert("CONNECTION_FAILED: Signal interference detected.");
-                    setSubscriptionStatus('idle');
-                }
-            } else {
+            if (response.ok) {
                 setSubscriptionStatus('subscribed');
+            } else {
+                const data = await response.json();
+                console.error('Subscription error:', data);
+                alert("CONNECTION_FAILED: Signal interference detected.");
+                setSubscriptionStatus('idle');
             }
         } catch (err) {
             console.error('Unexpected error:', err);
