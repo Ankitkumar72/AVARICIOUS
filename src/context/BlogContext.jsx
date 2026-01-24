@@ -37,8 +37,9 @@ export const BlogProvider = ({ children }) => {
     const fetchPosts = async () => {
         setLoading(true);
 
-        // Timeout promise to force max 5s load time
-        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 5000));
+        // User Request: "make sure loading... comes and after 5 seconds the logs show up"
+        // We force a MINIMUM wait of 5 seconds.
+        const delayPromise = new Promise((resolve) => setTimeout(resolve, 5000));
 
         try {
             const fetchPromise = supabase
@@ -46,21 +47,17 @@ export const BlogProvider = ({ children }) => {
                 .select('*')
                 .order('updated_at', { ascending: false });
 
-            // Race the fetch against the 5s timer
-            const result = await Promise.race([fetchPromise, timeoutPromise]);
+            // Wait for BOTH the 5s timer AND the fetch to complete
+            const [_, result] = await Promise.all([delayPromise, fetchPromise]);
 
-            if (result.timeout) {
-                console.warn("Data fetch timed out (exceeded 5s limit)");
-                // We stop loading. user will see either empty list or whatever state is consistent.
-            } else {
-                const { data, error } = result;
-                if (error) {
-                    console.error('Error fetching posts (using fallback):', error);
-                } else if (data) {
-                    // EXCLUSIVELY use DB posts (User Request: "Show only post which have been posted from Editor")
-                    setPosts(data);
-                }
+            const { data, error } = result;
+
+            if (error) {
+                console.error('Error fetching posts:', error);
+            } else if (data) {
+                setPosts(data);
             }
+
         } catch (err) {
             console.error("Supabase Connection Failed:", err);
         }
