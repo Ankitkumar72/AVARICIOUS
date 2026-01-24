@@ -36,7 +36,7 @@ function Home() {
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('q') || '';
     const newsGridRef = useRef(null);
-    const { posts, loading } = useBlog();
+    const { posts, loading, error } = useBlog();
     // Check if we have already booted this session
     const [isBooting, setIsBooting] = useState(() => {
         return !sessionStorage.getItem('hasBooted');
@@ -90,7 +90,7 @@ function Home() {
     // Filter posts
     const filteredNews = posts.filter(item =>
         item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category?.toLowerCase().includes(searchQuery.toLowerCase())
+        (item.category || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -207,7 +207,7 @@ function Home() {
                         </section>
 
                         {/* News Grid */}
-                        <NewsGrid posts={filteredNews} loading={loading} ref={newsGridRef} />
+                        <NewsGrid posts={filteredNews} loading={loading} error={error} ref={newsGridRef} />
 
                         {/* Subscription Section */}
                         <section className="subscription-section">
@@ -282,6 +282,12 @@ function Home() {
                     </div>
                 </div>
             )}
+
+            {/* DEBUG PANEL - REMOVE LATER */}
+            <div style={{ position: 'fixed', bottom: 0, left: 0, background: 'rgba(0,0,0,0.8)', color: '#0f0', padding: '10px', fontSize: '12px', zIndex: 10000, width: '100%', borderTop: '1px solid #0f0' }}>
+                DEBUG: Posts: {posts?.length || 0} | Loading: {loading.toString()} | Error: {error || 'None'} | Filtered: {filteredNews?.length || 0} |
+                Keys: URL={!!import.meta.env.VITE_SUPABASE_URL ? 'OK' : 'MISSING'}, KEY={!!import.meta.env.VITE_SUPABASE_ANON_KEY ? 'OK' : 'MISSING'}
+            </div>
         </div>
     );
 }

@@ -1,16 +1,24 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from '../supabaseClient';
-import { initialPosts } from '../data/initialPosts';
 
 const BlogContext = createContext();
 
 export const useBlog = () => useContext(BlogContext);
 
 export const BlogProvider = ({ children }) => {
-    // Initialize with fallback data so the page is never empty
-    const [posts, setPosts] = useState(initialPosts);
+    // Initialize with cached data if available for INSTANT load
+    const [posts, setPosts] = useState(() => {
+        try {
+            const cached = localStorage.getItem('cached_posts');
+            return cached ? JSON.parse(cached) : [];
+        } catch {
+            return [];
+        }
+    });
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
+
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         // Safe auth check
@@ -29,6 +37,7 @@ export const BlogProvider = ({ children }) => {
             };
         } catch (err) {
             console.warn("Supabase Client Error:", err);
+            setError(err.message);
         }
 
         fetchPosts();
@@ -36,6 +45,7 @@ export const BlogProvider = ({ children }) => {
 
     const fetchPosts = async () => {
         setLoading(true);
+        setError(null); // Clear previous errors
 
         // Safety Timeout: If DB hangs for > 8 seconds, stop loading so UI doesn't freeze.
         const timeoutPromise = new Promise((_, reject) =>
@@ -43,26 +53,34 @@ export const BlogProvider = ({ children }) => {
         );
 
         try {
+            if (!supabase) throw new Error("Supabase client is MISSING (Check .env)");
+
             const fetchPromise = supabase
-                .from('news_posts')
+                .from('news_posts') // Back to 'news_posts' as requested
                 .select('*')
                 .order('updated_at', { ascending: false });
 
             // specific check for 8s timeout vs fetch
             const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
+            console.log("SUPABASE_DEBUG: Data fetched:", data);
+            console.log("SUPABASE_DEBUG: Error fetched:", error);
+
             if (error) {
                 console.error('Error fetching posts:', error);
+                setError(error.message || 'Unknown Supabase Error');
             } else if (data) {
+                console.log(`SUPABASE_DEBUG: Setting ${data.length} posts.`);
                 setPosts(data);
+                localStorage.setItem('cached_posts', JSON.stringify(data));
             }
 
         } catch (err) {
             console.error("Fetch failed or timed out:", err);
-            // Fallback is already in 'posts' state (initialPosts)
+            setError(err.message || 'Network/Timeout Error');
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     const login = async (email, password) => {
@@ -79,7 +97,7 @@ export const BlogProvider = ({ children }) => {
     };
 
     return (
-        <BlogContext.Provider value={{ posts, loading, user, login, logout, fetchPosts }}>
+        <BlogContext.Provider value={{ posts, loading, error, user, login, logout, fetchPosts }}>
             {children}
         </BlogContext.Provider>
     );

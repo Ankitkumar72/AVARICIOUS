@@ -20,13 +20,13 @@ const BootSequence = ({ onComplete }) => {
             const timeout = setTimeout(() => {
                 setLines(prev => [...prev, BOOT_TEXT[currentIndex]]);
                 setCurrentIndex(prev => prev + 1);
-            }, 300);
+            }, 50);
             return () => clearTimeout(timeout);
         } else {
             // Sequence complete, wait a bit then unmount
             const timeout = setTimeout(() => {
                 onComplete();
-            }, 800);
+            }, 100);
             return () => clearTimeout(timeout);
         }
     }, [currentIndex, onComplete]);

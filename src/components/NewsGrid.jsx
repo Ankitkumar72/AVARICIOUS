@@ -2,13 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import defaultAuthorImg from '../assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 
-const NewsGrid = ({ posts, loading }) => {
-    // Only show loading screen if we have NO data to show
-    // (Optimistic UI: show partial/old data while fetching new data)
-    if (loading && (!posts || posts.length === 0)) {
+const NewsGrid = ({ posts, loading, error }) => {
+
+    if (error) {
         return (
-            <div className="grid place-items-center py-20 text-secondary">
-                <div className="mono animate-pulse">LOADING_DATA_STREAM...</div>
+            <div className="grid place-items-center py-20 text-red-500 mono">
+                <div className="text-xl">SYSTEM_FAILURE</div>
+                <div className="text-sm mt-2 font-mono">CODE: {error}</div>
+                <div className="text-xs text-gray-400 mt-2">Check console for details.</div>
             </div>
         );
     }
@@ -21,7 +22,6 @@ const NewsGrid = ({ posts, loading }) => {
             </div>
         );
     }
-
     return (
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 border-b border-white/5">
             {posts.map((news) => (

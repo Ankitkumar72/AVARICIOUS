@@ -47,10 +47,10 @@ const Archive = () => {
 
                 {/* List Container */}
                 <div className="archive-list-container flex-1">
-                    {loading ? (
-                        <div className="p-20 text-center mono animate-pulse">LOADING_ARCHIVES...</div>
-                    ) : (
+                    {posts.length > 0 ? (
                         postItems(posts, displayLimit)
+                    ) : (
+                        <div className="p-20 text-center mono text-secondary">ARCHIVES_EMPTY</div>
                     )}
                 </div>
 
