@@ -1,0 +1,30 @@
+name: Weekly Signal Burst
+
+on:
+  schedule:
+    # Runs automatically every Sunday AND Wednesday at 9:00 AM UTC
+    - cron: '0 9 * * 0,3'
+  workflow_dispatch: # THIS enables the manual "Run workflow" button
+
+jobs:
+  send_logs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Broadcast Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: node scripts/broadcast.js
