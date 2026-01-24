@@ -41,6 +41,16 @@ function Home() {
         setIsBooting(false);
     }, []);
 
+    const [subscriptionStatus, setSubscriptionStatus] = useState('idle'); // idle, connecting, subscribed
+
+    const handleSubscribe = () => {
+        setSubscriptionStatus('connecting');
+        // Simulate API call
+        setTimeout(() => {
+            setSubscriptionStatus('subscribed');
+        }, 1500);
+    };
+
     useEffect(() => {
         if (searchQuery && newsGridRef.current) {
             newsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -173,16 +183,29 @@ function Home() {
                         <section className="subscription-section">
                             <div className="mono text-accent" style={{ letterSpacing: '4px', fontSize: '0.8rem', marginBottom: '20px' }}>SYSTEM NOTIFICATION</div>
                             <h2 className="subscription-title">SUBSCRIBE TO<br />THE BLUEPRINT</h2>
-                            <div className="flex flex-col md:flex-row w-full max-w-[500px] gap-4 md:gap-0 md:border md:border-[#333]">
-                                <input
-                                    type="text"
-                                    placeholder="ENTER_ID_KEY"
-                                    className="flex-1 bg-transparent border border-[#333] md:border-none p-4 md:p-5 text-white font-mono outline-none"
-                                />
-                                <button className="bg-white text-black px-8 py-4 md:py-0 font-bold hover:bg-[#00f0ff] transition-colors">
-                                    CONNECT
-                                </button>
-                            </div>
+                            {subscriptionStatus === 'subscribed' ? (
+                                <div className="border border-[#00f0ff] bg-[#00f0ff]/10 p-6 text-center animate-pulse">
+                                    <div className="text-[#00f0ff] font-mono font-bold text-xl mb-2">UPLINK ESTABLISHED</div>
+                                    <div className="text-[#00f0ff] font-mono text-sm">ID_REF: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+                                    <div className="text-gray-400 font-mono text-xs mt-2">WELCOME TO THE GRID</div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col md:flex-row w-full max-w-[500px] gap-4 md:gap-0 md:border md:border-[#333]">
+                                    <input
+                                        type="text"
+                                        placeholder="ENTER_ID_KEY"
+                                        className="flex-1 bg-transparent border border-[#333] md:border-none p-4 md:p-5 text-white font-mono outline-none"
+                                        disabled={subscriptionStatus === 'connecting'}
+                                    />
+                                    <button
+                                        onClick={handleSubscribe}
+                                        disabled={subscriptionStatus === 'connecting'}
+                                        className="bg-white text-black px-8 py-4 md:py-0 font-bold hover:bg-[#00f0ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {subscriptionStatus === 'connecting' ? 'PROCESSING...' : 'CONNECT'}
+                                    </button>
+                                </div>
+                            )}
                             {/* Decorative Lines */}
                             <div className="deco-line left"></div>
                             <div className="deco-line right"></div>
