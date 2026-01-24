@@ -63,14 +63,10 @@ export const BlogProvider = ({ children }) => {
             // specific check for 8s timeout vs fetch
             const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
-            console.log("SUPABASE_DEBUG: Data fetched:", data);
-            console.log("SUPABASE_DEBUG: Error fetched:", error);
-
             if (error) {
                 console.error('Error fetching posts:', error);
                 setError(error.message || 'Unknown Supabase Error');
             } else if (data) {
-                console.log(`SUPABASE_DEBUG: Setting ${data.length} posts.`);
                 setPosts(data);
                 localStorage.setItem('cached_posts', JSON.stringify(data));
             }

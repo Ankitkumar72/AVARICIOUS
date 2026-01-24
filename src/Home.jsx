@@ -283,11 +283,7 @@ function Home() {
                 </div>
             )}
 
-            {/* DEBUG PANEL - REMOVE LATER */}
-            <div style={{ position: 'fixed', bottom: 0, left: 0, background: 'rgba(0,0,0,0.8)', color: '#0f0', padding: '10px', fontSize: '12px', zIndex: 10000, width: '100%', borderTop: '1px solid #0f0' }}>
-                DEBUG: Posts: {posts?.length || 0} | Loading: {loading.toString()} | Error: {error || 'None'} | Filtered: {filteredNews?.length || 0} |
-                Keys: URL={!!import.meta.env.VITE_SUPABASE_URL ? 'OK' : 'MISSING'}, KEY={!!import.meta.env.VITE_SUPABASE_ANON_KEY ? 'OK' : 'MISSING'}
-            </div>
+
         </div>
     );
 }
