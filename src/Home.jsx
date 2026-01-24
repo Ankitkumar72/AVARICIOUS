@@ -47,17 +47,6 @@ function Home() {
         sessionStorage.setItem('hasBooted', 'true');
     }, []);
 
-    // Local visual loading state for the Data Stream (5s delay)
-    // Only enforced if we just booted or it's the first render of Home in this session
-    const [visualLoading, setVisualLoading] = useState(true);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setVisualLoading(false);
-        }, 3000);
-        return () => clearTimeout(timer);
-    }, []);
-
     const [subscriptionStatus, setSubscriptionStatus] = useState('idle'); // idle, connecting, subscribed, error
     const [email, setEmail] = useState('');
 
@@ -218,7 +207,7 @@ function Home() {
                         </section>
 
                         {/* News Grid */}
-                        <NewsGrid posts={filteredNews} loading={loading || visualLoading} ref={newsGridRef} />
+                        <NewsGrid posts={filteredNews} loading={loading} ref={newsGridRef} />
 
                         {/* Subscription Section */}
                         <section className="subscription-section">
