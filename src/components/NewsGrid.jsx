@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import defaultAuthorImg from '../assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 
 const NewsGrid = ({ posts, loading }) => {
-    if (loading) {
+    // Only show loading screen if we have NO data to show
+    // (Optimistic UI: show partial/old data while fetching new data)
+    if (loading && (!posts || posts.length === 0)) {
         return (
             <div className="grid place-items-center py-20 text-secondary">
                 <div className="mono animate-pulse">LOADING_DATA_STREAM...</div>
