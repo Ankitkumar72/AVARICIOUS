@@ -37,10 +37,14 @@ function Home() {
     const searchQuery = searchParams.get('q') || '';
     const newsGridRef = useRef(null);
     const { posts, loading } = useBlog();
-    const [isBooting, setIsBooting] = useState(true);
+    // Check if we have already booted this session
+    const [isBooting, setIsBooting] = useState(() => {
+        return !sessionStorage.getItem('hasBooted');
+    });
 
     const handleBootComplete = useCallback(() => {
         setIsBooting(false);
+        sessionStorage.setItem('hasBooted', 'true');
     }, []);
 
     const [subscriptionStatus, setSubscriptionStatus] = useState('idle'); // idle, connecting, subscribed, error
