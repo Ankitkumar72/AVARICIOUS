@@ -44,24 +44,34 @@ export const BlogProvider = ({ children }) => {
     }, []);
 
     const fetchPosts = async () => {
+        console.log("DEBUG: fetchPosts STARTED");
         setLoading(true);
         setError(null); // Clear previous errors
 
-        // Safety Timeout: If DB hangs for > 8 seconds, stop loading so UI doesn't freeze.
+        // Safety Timeout: If DB hangs for > 5 seconds, stop loading so UI doesn't freeze.
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Request timed out')), 8000)
+            setTimeout(() => {
+                console.log("DEBUG: Timeout Reached");
+                reject(new Error('Request timed out (5s limit)'));
+            }, 5000)
         );
 
         try {
             if (!supabase) throw new Error("Supabase client is MISSING (Check .env)");
 
+            console.log("DEBUG: calling supabase.from('news_posts')");
             const fetchPromise = supabase
                 .from('news_posts') // Back to 'news_posts' as requested
                 .select('*')
                 .order('updated_at', { ascending: false });
 
-            // specific check for 8s timeout vs fetch
-            const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+            // specific check for timeout vs fetch
+            const result = await Promise.race([fetchPromise, timeoutPromise]);
+
+            // Supabase returns { data, error } object on success
+            const { data, error } = result;
+
+            console.log("DEBUG: Fetch Result:", { dataReceived: !!data, error: error });
 
             if (error) {
                 console.error('Error fetching posts:', error);
@@ -75,6 +85,7 @@ export const BlogProvider = ({ children }) => {
             console.error("Fetch failed or timed out:", err);
             setError(err.message || 'Network/Timeout Error');
         } finally {
+            console.log("DEBUG: fetchPosts FINALLY block - Setting loading to false");
             setLoading(false);
         }
     };
