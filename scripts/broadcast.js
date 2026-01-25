@@ -6,77 +6,83 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 
 // Initialize Nodemailer with Gmail SMTP
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.GMAIL_USER, // Your Gmail address
-        pass: process.env.GMAIL_APP_PASSWORD, // Your App Password
-    },
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER, // Your Gmail address
+    pass: process.env.GMAIL_APP_PASSWORD, // Your App Password
+  },
 });
 
 async function initiateWeeklyUplink() {
-    try {
-        console.log("INITIATING_UPLINK: Scanning for biological assets...");
+  try {
+    console.log("INITIATING_UPLINK: Scanning for clandestine data packets...");
 
-        // 1. Fetch all active "Biological Assets" (Subscribers)
-        const { data: subscribers, error: subError } = await supabase
-            .from('subscribers')
-            .select('email')
-            .eq('status', 'active');
+    // 1. Fetch one unsent Secret Burst
+    const { data: burst, error: burstError } = await supabase
+      .from('secret_bursts')
+      .select('*')
+      .eq('is_sent', false)
+      .limit(1)
+      .maybeSingle();
 
-        if (subError) throw subError;
+    if (burstError) throw burstError;
 
-        if (!subscribers || subscribers.length === 0) {
-            console.log("UPLINK_TERMINATED: No active subscribers found.");
-            return;
-        }
-
-        console.log(`ASSETS_DETECTED: ${subscribers.length} targets locked.`);
-
-        // 2. Fetch the latest stories
-        const { data: logs, error: logError } = await supabase
-            .from('news_posts')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(3);
-
-        if (logError) throw logError;
-
-        if (!logs || logs.length === 0) {
-            console.log("UPLINK_TERMINATED: No logs found to transmit.");
-            return;
-        }
-
-        // 3. Construct the Data Packet
-        const emailList = subscribers.map(s => s.email); // Sends to everyone in 'bcc' for privacy
-        const logContent = logs.map(log => `
-      <h3>[LOG ${log.id}]: ${log.title}</h3>
-      <p>${log.content ? log.content.substring(0, 300) : 'No content'}...</p>
-      <a href="https://pixy-news.vercel.app/blog/${log.id}">READ_FULL_TRANSMISSION</a>
-      <hr>
-    `).join('');
-
-        // 4. Fire the Signal Burst
-        const mailOptions = {
-            from: `"Pixy System" <${process.env.GMAIL_USER}>`,
-            bcc: emailList, // Use BCC so users don't see each other's emails
-            subject: `[SIGNAL_BURST] Weekly Archive: ${new Date().toLocaleDateString()}`,
-            html: `
-        <div style="background: #000; color: #00FFFF; font-family: monospace; padding: 20px;">
-          <h2>SYSTEM_ALERT: WEEKLY_DATA_DUMP</h2>
-          <p>The Archon's scans are low. Transmitting latest entries...</p>
-          ${logContent}
-          <p style="font-size: 10px;">[TERMINATE_CONNECTION / PURGE_TRACE]</p>
-        </div>
-      `
-        };
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log("UPLINK_SUCCESSFUL: Signal distributed to " + info.messageId);
-
-    } catch (err) {
-        console.error("UPLINK_CRITICAL_FAILURE:", err.message);
-        process.exit(1);
+    if (!burst) {
+      console.log("SILENT_MODE: No new secret bursts to transmit.");
+      return;
     }
+
+    console.log(`PACKET_FOUND: [${burst.burst_type}] ${burst.subject}`);
+
+    // 2. Fetch all Collective Members
+    const { data: members, error: memError } = await supabase
+      .from('collective_members')
+      .select('email');
+
+    if (memError) throw memError;
+
+    if (!members || members.length === 0) {
+      console.log("UPLINK_TERMINATED: No field agents found.");
+      return;
+    }
+
+    const emailList = members.map(m => m.email);
+    console.log(`TARGETS_LOCKED: ${emailList.length} agents.`);
+
+    // 3. Send via Gmail SMTP
+    const mailOptions = {
+      from: `"Elias-7 // Partition 09" <${process.env.GMAIL_USER}>`,
+      bcc: emailList,
+      subject: burst.subject,
+      // Raw text format for immersion
+      text: `[DECRYPTED DATA]: \n\n${burst.content}\n\n[END_OF_TRANSMISSION]\n// ID_REF: ${burst.id}`,
+      html: `
+<div style="background: #050505; color: #00FF41; font-family: 'Courier New', monospace; padding: 20px;">
+    <h3 style="border-bottom: 1px solid #00FF41; padding-bottom: 10px;">[SIGNAL_INTERCEPT] TYPE: ${burst.burst_type}</h3>
+    <pre style="white-space: pre-wrap; color: #ccc;">${burst.content}</pre>
+    <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 10px; font-size: 10px; color: #666;">
+        // PURGE_ID: ${burst.id}<br/>
+        // CONNECTION: TERMINATED
+    </div>
+</div>
+            `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("UPLINK_SUCCESSFUL: Burst transmitted. ID: " + info.messageId);
+
+    // 4. Mark as Sent
+    const { error: updateError } = await supabase
+      .from('secret_bursts')
+      .update({ is_sent: true })
+      .eq('id', burst.id);
+
+    if (updateError) console.error("WARNING: Failed to mark burst as sent.", updateError);
+
+  } catch (err) {
+    console.error("UPLINK_CRITICAL_FAILURE:", err.message);
+    process.exit(1);
+  }
 }
 
 initiateWeeklyUplink();

@@ -4,6 +4,15 @@ import defaultAuthorImg from '../assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 
 const NewsGrid = ({ posts, loading, error }) => {
 
+    if (loading) {
+        return (
+            <div className="grid place-items-center py-20 text-accent mono">
+                <div className="text-xl animate-pulse">ESTABLISHING_UPLINK...</div>
+                <div className="text-sm mt-2 opacity-70">DECRYPTING_DATA_STREAM</div>
+            </div>
+        );
+    }
+
     if (error) {
         return (
             <div className="grid place-items-center py-20 text-red-500 mono">
@@ -19,6 +28,12 @@ const NewsGrid = ({ posts, loading, error }) => {
             <div className="grid place-items-center py-20 text-secondary">
                 <div className="mono text-xl mb-2">NO_DATA_FOUND</div>
                 <div className="text-sm">Try adjusting your search filters.</div>
+                <div className="text-[10px] text-gray-600 mt-4 font-mono border border-gray-800 p-2 rounded">
+                    DEBUG_DIAGNOSTICS:<br />
+                    STATUS: ONLINE<br />
+                    ITEMS_RECEIVED: {posts?.length ?? 'NULL'}<br />
+                    LOADING_STATE: {String(loading).toUpperCase()}
+                </div>
             </div>
         );
     }
