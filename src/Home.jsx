@@ -154,6 +154,11 @@ function Home() {
                         {/* Header */}
                         <Header />
 
+                        {/* Diagnostics Link (Temporary) */}
+                        <div className="fixed bottom-2 right-2 z-50 opacity-20 hover:opacity-100 transition-opacity">
+                            <Link to="/diagnostics" className="text-[10px] mono text-accent border border-accent px-1">SYS_DIAG</Link>
+                        </div>
+
                         {/* Main Hero Grid */}
                         <section className="hero-section">
 
