@@ -255,7 +255,7 @@ function Home() {
                         </section>
 
                         {/* News Grid */}
-                        <NewsGrid posts={filteredNews} loading={loading} error={error} ref={newsGridRef} />
+                        <NewsGrid posts={posts} loading={loading} error={error} ref={newsGridRef} />
 
                         {/* Subscription Section (RENAMED: JOIN THE COLLECTIVE) */}
                         <section className="subscription-section relative">
