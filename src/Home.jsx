@@ -30,55 +30,93 @@ const HighlightText = ({ text, highlight }) => {
     );
 };
 
-import { supabase } from './supabaseClient'; // Add this import
+import { supabase } from './supabaseClient';
+
+// Hacking Overlay Component
+const HackingOverlay = () => (
+    <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center font-mono text-[#00FF41]">
+        <div className="text-4xl font-bold animate-pulse mb-4">ESTABLISHING_UPLINK</div>
+        <div className="text-sm opacity-80">
+            <div>BYPASSING_FIREWALL... [OK]</div>
+            <div>INJECTING_PACKET... [OK]</div>
+            <div>MASKING_IP_ADDRESS... [OK]</div>
+        </div>
+        <div className="mt-8 text-xs text-red-500 animate-bounce">DO_NOT_CLOSE_TERMINAL</div>
+    </div>
+);
 
 function Home() {
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('q') || '';
     const newsGridRef = useRef(null);
     const { posts, loading, error } = useBlog();
-    // Check if we have already booted this session
-    const [isBooting, setIsBooting] = useState(() => {
-        return !sessionStorage.getItem('hasBooted');
-    });
+
+    // Boot Sequence State
+    const [isBooting, setIsBooting] = useState(() => !sessionStorage.getItem('hasBooted'));
 
     const handleBootComplete = useCallback(() => {
         setIsBooting(false);
         sessionStorage.setItem('hasBooted', 'true');
     }, []);
 
-    const [subscriptionStatus, setSubscriptionStatus] = useState('idle'); // idle, connecting, subscribed, error
-    const [email, setEmail] = useState('');
+    // Collective Join State
+    const [joinState, setJoinState] = useState('IDLE'); // IDLE, HACKING, JOINED, ERROR
+    const [formData, setFormData] = useState({
+        identityHash: '',
+        accessKey: '',
+        nodeOrigin: 'SECTOR_07',
+        latencyPref: 'ULTRA_LOW',
+        email: ''
+    });
 
-    const handleSubscribe = async () => {
-        if (!email || !email.includes('@')) {
-            alert("INVALID_SIGNAL: Please enter a valid frequency (email).");
+    // Dynamic Latency Jitter
+    const [latency, setLatency] = useState(14);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLatency(12 + Math.floor(Math.random() * 8)); // 12-19ms
+        }, 800);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleJoin = async () => {
+        // 1. Validation
+        if (!formData.email.includes('@') || !formData.identityHash || !formData.accessKey) {
+            alert("INVALID_SIGNAL: ALL FIELDS REQUIRED.");
             return;
         }
 
-        setSubscriptionStatus('connecting');
+        // 2. Trigger Hacking Overlay
+        setJoinState('HACKING');
 
-        try {
-            // Call the Vercel Serverless Function
-            const response = await fetch('/api/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
+        // 3. Fake Delay for Effect
+        setTimeout(async () => {
+            try {
+                const { error } = await supabase
+                    .from('collective_members')
+                    .insert([{
+                        identity_hash: formData.identityHash,
+                        access_key: formData.accessKey,
+                        node_origin: formData.nodeOrigin,
+                        latency_pref: formData.latencyPref,
+                        email: formData.email
+                    }]);
 
-            if (response.ok) {
-                setSubscriptionStatus('subscribed');
-            } else {
-                const data = await response.json();
-                console.error('Subscription error:', data);
-                // Show the actual error for debugging
-                alert(`CONNECTION_FAILED: ${data.error || 'Signal interference detected.'}`);
-                setSubscriptionStatus('idle');
+                if (error) {
+                    if (error.code === '23505') { // Unique violation
+                        alert("SIGNAL_COLLISION: IDENTITY_HASH_ALREADY_ACTIVE");
+                    } else {
+                        throw error;
+                    }
+                    setJoinState('IDLE');
+                } else {
+                    setJoinState('JOINED');
+                }
+            } catch (err) {
+                console.error("UPLINK_FAILED:", err);
+                alert("CONNECTION_RESET_BY_PEER");
+                setJoinState('IDLE');
             }
-        } catch (err) {
-            console.error('Unexpected error:', err);
-            setSubscriptionStatus('idle');
-        }
+        }, 3000);
     };
 
     useEffect(() => {
@@ -95,7 +133,8 @@ function Home() {
 
     return (
         <div className="app-main-wrapper">
-            {isBooting && <BootSequence onComplete={handleBootComplete} />}
+            {/* Hacking Overlay */}
+            {joinState === 'HACKING' && <HackingOverlay />}
 
             {!isBooting && (
                 <div className="fade-in-content">
@@ -107,6 +146,13 @@ function Home() {
                         <div className="corner-marker corner-top-right"></div>
                         <div className="corner-marker corner-bottom-left"></div>
                         <div className="corner-marker corner-bottom-right"></div>
+
+                        {/* Additional Status Indicators (Bottom Right Fixed) */}
+                        <div className="fixed bottom-10 right-10 text-[10px] font-mono text-gray-500 z-50 flex flex-col items-end gap-1 pointer-events-none">
+                            <div className="text-[#00FF41]">ENCRYPTION: AES-256</div>
+                            <div className={latency > 17 ? "text-red-500" : "text-gray-500"}>LATENCY: {latency}MS</div>
+                            <div>SIGNAL: STABLE</div>
+                        </div>
 
                         {/* Header */}
                         <Header />
@@ -209,37 +255,101 @@ function Home() {
                         {/* News Grid */}
                         <NewsGrid posts={filteredNews} loading={loading} error={error} ref={newsGridRef} />
 
-                        {/* Subscription Section */}
-                        <section className="subscription-section">
-                            <div className="mono text-accent" style={{ letterSpacing: '4px', fontSize: '0.8rem', marginBottom: '20px' }}>SYSTEM NOTIFICATION</div>
-                            <h2 className="subscription-title">SUBSCRIBE TO<br />THE BLUEPRINT</h2>
-                            {subscriptionStatus === 'subscribed' ? (
+                        {/* Subscription Section (RENAMED: JOIN THE COLLECTIVE) */}
+                        <section className="subscription-section relative">
+                            <div className="absolute top-0 right-0 p-4 font-mono text-xs text-secondary opacity-50">
+                                LOC: {formData.nodeOrigin} // LAT: {latency}ms
+                            </div>
+
+                            <div className="mono text-accent" style={{ letterSpacing: '4px', fontSize: '0.8rem', marginBottom: '20px' }}>PROTOCOL_INITIATED</div>
+                            <h2 className="subscription-title">JOIN THE<br />COLLECTIVE</h2>
+
+                            {joinState === 'JOINED' ? (
                                 <div className="border border-[#00f0ff] bg-[#00f0ff]/10 p-6 text-center animate-pulse">
-                                    <div className="text-[#00f0ff] font-mono font-bold text-xl mb-2">UPLINK ESTABLISHED</div>
-                                    <div className="text-[#00f0ff] font-mono text-sm">ID_REF: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
-                                    <div className="text-gray-400 font-mono text-xs mt-2">WELCOME TO THE GRID</div>
+                                    <div className="text-[#00f0ff] font-mono font-bold text-xl mb-2">ACCESS GRANTED</div>
+                                    <div className="text-[#00f0ff] font-mono text-sm">HASH_ID: {formData.identityHash.toUpperCase()}</div>
+                                    <div className="text-gray-400 font-mono text-xs mt-2">AWAITING CLANDESTINE BURST...</div>
                                 </div>
                             ) : (
-                                <div className="flex flex-col md:flex-row w-full max-w-[500px] gap-4 md:gap-0 md:border md:border-[#333] relative z-10">
-                                    <input
-                                        type="email"
-                                        placeholder="ENTER_ID_KEY"
-                                        className="flex-1 bg-transparent border border-[#333] md:border-none p-4 md:p-5 text-white font-mono outline-none"
-                                        disabled={subscriptionStatus === 'connecting'}
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-[600px] relative z-10 p-6 border border-[#333] bg-black/50 backdrop-blur-md">
+
+                                    {/* IDENTITY HASH */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[10px] font-mono text-secondary">IDENTITY_HASH</label>
+                                        <input
+                                            type="text"
+                                            placeholder="USER_NAME_ALPHA"
+                                            className="bg-transparent border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
+                                            value={formData.identityHash}
+                                            onChange={(e) => setFormData({ ...formData, identityHash: e.target.value })}
+                                        />
+                                    </div>
+
+                                    {/* ACCESS KEY */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[10px] font-mono text-secondary">ACCESS_KEY</label>
+                                        <input
+                                            type="password"
+                                            placeholder="••••••••"
+                                            className="bg-transparent border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
+                                            value={formData.accessKey}
+                                            onChange={(e) => setFormData({ ...formData, accessKey: e.target.value })}
+                                        />
+                                    </div>
+
+                                    {/* NODE ORIGIN */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[10px] font-mono text-secondary">NODE_ORIGIN</label>
+                                        <select
+                                            className="bg-black border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
+                                            value={formData.nodeOrigin}
+                                            onChange={(e) => setFormData({ ...formData, nodeOrigin: e.target.value })}
+                                        >
+                                            <option value="SECTOR_07">SECTOR 07 (Ruins)</option>
+                                            <option value="NEO_TOKYO">NEO TOKYO (Core)</option>
+                                            <option value="LUNAR_COLONY">LUNAR COLONY</option>
+                                            <option value="UNKNOWN">UNKNOWN PROXY</option>
+                                        </select>
+                                    </div>
+
+                                    {/* LATENCY PREF */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[10px] font-mono text-secondary">LATENCY_PREF</label>
+                                        <select
+                                            className="bg-black border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
+                                            value={formData.latencyPref}
+                                            onChange={(e) => setFormData({ ...formData, latencyPref: e.target.value })}
+                                        >
+                                            <option value="ULTRA_LOW">ULTRA_LOW (Risk: High)</option>
+                                            <option value="STANDARD">STANDARD (Masked)</option>
+                                            <option value="HIGH">HIGH (Tor/VPN)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* EMAIL (FULL CONSTANT CONTACT) */}
+                                    <div className="col-span-1 md:col-span-2 flex flex-col gap-1 mt-2">
+                                        <label className="text-[10px] font-mono text-secondary">FREQUENCY_LOCK (EMAIL)</label>
+                                        <input
+                                            type="email"
+                                            placeholder="email@provider.com"
+                                            className="bg-transparent border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                                        />
+                                    </div>
+
+                                    {/* SUBMIT */}
                                     <button
                                         type="button"
-                                        onClick={handleSubscribe}
-                                        disabled={subscriptionStatus === 'connecting'}
-                                        className="bg-white text-black px-8 py-4 md:py-0 font-bold hover:bg-[#00f0ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        onClick={handleJoin}
+                                        className="col-span-1 md:col-span-2 bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff] py-4 mt-2 font-bold hover:bg-[#00f0ff] hover:text-black transition-all uppercase tracking-widest"
                                     >
-                                        {subscriptionStatus === 'connecting' ? 'PROCESSING...' : 'CONNECT'}
+                                        {joinState === 'HACKING' ? 'ESTABLISHING HANDSHAKE...' : 'INITIATE_UPLINK'}
                                     </button>
                                 </div>
                             )}
+
                             {/* Decorative Lines */}
                             <div className="deco-line left"></div>
                             <div className="deco-line right"></div>

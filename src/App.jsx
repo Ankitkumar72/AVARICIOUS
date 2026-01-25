@@ -16,6 +16,7 @@ const NeuralSynapse = lazy(() => import('./pages/NeuralSynapse'));
 const JoinNetwork = lazy(() => import('./pages/JoinNetwork'));
 const EnforcementBypass = lazy(() => import('./pages/EnforcementBypass'));
 const SystemIntegrity = lazy(() => import('./pages/SystemIntegrity'));
+const AdminBurst = lazy(() => import('./pages/AdminBurst'));
 
 // Loading Fallback Component
 const LoadingScreen = () => (
@@ -127,6 +128,14 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<LoadingScreen />}>
         <SystemIntegrity />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/admin/uplink",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <AdminBurst />
       </Suspense>
     ),
   },
