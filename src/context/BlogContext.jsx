@@ -65,9 +65,7 @@ export const BlogProvider = ({ children }) => {
             console.log("DEBUG: calling supabase.from('news_posts')");
             const fetchPromise = supabase
                 .from('news_posts') // Back to 'news_posts' as requested
-                // Optimized Selection: Get only what's needed for the grid.
-                // We still need 'content' for the preview text, but if we had a dedicated 'summary' column it would be faster.
-                .select('id, title, image_url, category, content, updated_at')
+                .select('*')
                 .order('updated_at', { ascending: false })
                 .then(res => res); // Explicitly return the promise
 
