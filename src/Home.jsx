@@ -136,6 +136,8 @@ function Home() {
             {/* Hacking Overlay */}
             {joinState === 'HACKING' && <HackingOverlay />}
 
+            {isBooting && <BootSequence onComplete={handleBootComplete} />}
+
             {!isBooting && (
                 <div className="fade-in-content">
                     {/* Boxed Layout Container */}
