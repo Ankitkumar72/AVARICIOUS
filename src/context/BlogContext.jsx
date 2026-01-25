@@ -17,7 +17,6 @@ export const BlogProvider = ({ children }) => {
     });
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
-
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -44,18 +43,45 @@ export const BlogProvider = ({ children }) => {
     }, []);
 
     const fetchPosts = async () => {
-        console.log("DEBUG: fetchPosts STARTED - FORCED_BYPASS_V2");
+        console.log("DEBUG: fetchPosts STARTED - SIMPLE VERSION");
         setLoading(true);
         setError(null);
 
-        // BYPASS LOGIC:
-        // Force loading to false after 100ms.
-        // This PROVES if we can update the state.
-        setTimeout(() => {
-            console.log("DEBUG: FORCED LOADING FALSE");
+        try {
+            // Check if supabase client exists
+            if (!supabase) {
+                throw new Error("Supabase client is not initialized");
+            }
+
+            console.log("DEBUG: Fetching from news_posts table...");
+
+            // Simple, direct fetch - no Promise.race, no timeouts
+            const { data, error: fetchError } = await supabase
+                .from('news_posts')
+                .select('*')
+                .order('updated_at', { ascending: false });
+
+            console.log("DEBUG: Fetch completed", {
+                success: !fetchError,
+                rowCount: data?.length || 0
+            });
+
+            if (fetchError) {
+                console.error('Supabase Error:', fetchError);
+                setError(fetchError.message);
+            } else if (data) {
+                console.log("DEBUG: Setting posts and caching");
+                setPosts(data);
+                localStorage.setItem('cached_posts', JSON.stringify(data));
+            }
+
+        } catch (err) {
+            console.error("Fetch Exception:", err);
+            setError(err.message || 'Network Error');
+        } finally {
+            console.log("DEBUG: Setting loading to false");
             setLoading(false);
-            setError("DEBUG_BYPASS_COMPLETE");
-        }, 100);
+        }
     };
 
     const login = async (email, password) => {
