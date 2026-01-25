@@ -57,13 +57,17 @@ export const BlogProvider = ({ children }) => {
         );
 
         try {
-            if (!supabase) throw new Error("Supabase client is MISSING (Check .env)");
+            if (!supabase) throw new Error("Supabase client is MISSING");
+
+            // Check if configured (imported from supabaseClient usually, but here checking client internals if possible, or assume explicit error earlier)
+            // Ideally import isConfigured, but for now let's wrap the promise safely.
 
             console.log("DEBUG: calling supabase.from('news_posts')");
             const fetchPromise = supabase
                 .from('news_posts') // Back to 'news_posts' as requested
                 .select('*')
-                .order('updated_at', { ascending: false });
+                .order('updated_at', { ascending: false })
+                .then(res => res); // Explicitly return the promise
 
             // specific check for timeout vs fetch
             const result = await Promise.race([fetchPromise, timeoutPromise]);

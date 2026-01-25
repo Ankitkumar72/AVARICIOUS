@@ -9,4 +9,5 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.error("Make sure your .env file has VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY");
 }
 
+export const isConfigured = !!supabaseUrl && !!supabaseAnonKey;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

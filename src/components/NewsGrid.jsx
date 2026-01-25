@@ -4,7 +4,30 @@ import defaultAuthorImg from '../assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 
 const NewsGrid = ({ posts, loading, error }) => {
 
+    // UI-side safety timeout
+    const [localTimeout, setLocalTimeout] = React.useState(false);
+
+    React.useEffect(() => {
+        let timer;
+        if (loading) {
+            timer = setTimeout(() => setLocalTimeout(true), 8000); // 8s UI timeout
+        } else {
+            setLocalTimeout(false);
+        }
+        return () => clearTimeout(timer);
+    }, [loading]);
+
     if (loading) {
+        if (localTimeout) {
+            return (
+                <div className="grid place-items-center py-20 text-red-500 mono">
+                    <div className="text-xl">UPLINK_TIMEOUT</div>
+                    <div className="text-sm mt-2 font-mono">SERVER_NOT_RESPONDING</div>
+                    <div className="text-xs text-secondary mt-2">Check your internet connection or Vercel logs.</div>
+                </div>
+            );
+        }
+
         return (
             <div className="grid place-items-center py-20 text-accent mono">
                 <div className="text-xl animate-pulse">ESTABLISHING_UPLINK...</div>
