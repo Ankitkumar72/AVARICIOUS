@@ -23,7 +23,7 @@ const NewsGrid = ({ posts, loading, error }) => {
         );
     }
 
-    if (!posts || posts.length === 0) {
+    if (!posts || !Array.isArray(posts) || posts.length === 0) {
         return (
             <div className="grid place-items-center py-20 text-secondary">
                 <div className="mono text-xl mb-2">NO_DATA_FOUND</div>

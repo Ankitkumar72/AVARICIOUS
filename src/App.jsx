@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { BlogProvider } from './context/BlogContext';
 import './index.css';
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load components
 const Home = lazy(() => import('./Home'));
@@ -153,9 +154,11 @@ function App() {
 
   return (
     <BlogProvider>
-      <div className="interactive-grid"></div>
-      <RouterProvider router={router} />
-      <SpeedInsights />
+      <ErrorBoundary>
+        <div className="interactive-grid"></div>
+        <RouterProvider router={router} />
+        <SpeedInsights />
+      </ErrorBoundary>
     </BlogProvider>
   );
 }
