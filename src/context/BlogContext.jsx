@@ -48,12 +48,12 @@ export const BlogProvider = ({ children }) => {
         setLoading(true);
         setError(null); // Clear previous errors
 
-        // Safety Timeout: If DB hangs for > 5 seconds, stop loading so UI doesn't freeze.
+        // Safety Timeout: If DB hangs for > 3 seconds, stop loading so UI doesn't freeze.
         const timeoutPromise = new Promise((_, reject) =>
             setTimeout(() => {
                 console.log("DEBUG: Timeout Reached");
-                reject(new Error('Request timed out (5s limit)'));
-            }, 5000)
+                reject(new Error('DEBUG_TIMEOUT_3000'));
+            }, 3000)
         );
 
         try {
