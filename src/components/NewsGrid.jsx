@@ -3,6 +3,23 @@ import { Link } from 'react-router-dom';
 import defaultAuthorImg from '../assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 
 const NewsGrid = ({ posts, loading, error }) => {
+    // DEBUG OVERLAY
+    if (true) {
+        return (
+            <div className="fixed top-20 left-10 z-[9999] bg-black border border-red-500 p-4 font-mono text-xs text-white max-w-sm">
+                <div className="text-red-500 font-bold mb-2">DEBUG_OVERLAY_V1</div>
+                <div>LOADING: {String(loading).toUpperCase()}</div>
+                <div>ERROR: {String(error)}</div>
+                <div>POSTS: {posts?.length ?? 'NULL'}</div>
+                {loading && (
+                    <div className="mt-2 text-yellow-500">
+                        STATE_LOCKED: {loading ? "YES" : "NO"}
+                    </div>
+                )}
+                <button onClick={() => window.location.reload()} className="mt-4 border border-white px-2 py-1">RELOAD</button>
+            </div>
+        );
+    }
 
     // UI-side safety timeout
     const [localTimeout, setLocalTimeout] = React.useState(false);
