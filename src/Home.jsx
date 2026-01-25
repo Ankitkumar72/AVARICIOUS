@@ -149,12 +149,7 @@ function Home() {
                         <div className="corner-marker corner-bottom-left"></div>
                         <div className="corner-marker corner-bottom-right"></div>
 
-                        {/* Additional Status Indicators (Bottom Right Fixed) */}
-                        <div className="fixed bottom-10 right-10 text-[10px] font-mono text-gray-500 z-50 flex flex-col items-end gap-1 pointer-events-none">
-                            <div className="text-[#00FF41]">ENCRYPTION: AES-256</div>
-                            <div className={latency > 17 ? "text-red-500" : "text-gray-500"}>LATENCY: {latency}MS</div>
-                            <div>SIGNAL: STABLE</div>
-                        </div>
+
 
                         {/* Header */}
                         <Header />
