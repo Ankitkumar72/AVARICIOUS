@@ -10,4 +10,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const isConfigured = !!supabaseUrl && !!supabaseAnonKey;
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Safely initialize client to prevent app-wide crash if variables are missing
+export const supabase = (() => {
+    try {
+        if (isConfigured) {
+            return createClient(supabaseUrl, supabaseAnonKey);
+        } else {
+            console.warn("Supabase Config Missing: Client set to null.");
+        }
+    } catch (e) {
+        console.error("Supabase Init Failed:", e);
+    }
+    return null;
+})();
