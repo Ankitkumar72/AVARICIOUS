@@ -44,54 +44,18 @@ export const BlogProvider = ({ children }) => {
     }, []);
 
     const fetchPosts = async () => {
-        console.log("DEBUG: fetchPosts STARTED");
+        console.log("DEBUG: fetchPosts STARTED - FORCED_BYPASS_V2");
         setLoading(true);
-        setError(null); // Clear previous errors
+        setError(null);
 
-        // Safety Timeout: If DB hangs for > 3 seconds, stop loading so UI doesn't freeze.
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => {
-                console.log("DEBUG: Timeout Reached");
-                reject(new Error('DEBUG_TIMEOUT_3000'));
-            }, 3000)
-        );
-
-        try {
-            if (!supabase) throw new Error("Supabase client is MISSING");
-
-            // Check if configured (imported from supabaseClient usually, but here checking client internals if possible, or assume explicit error earlier)
-            // Ideally import isConfigured, but for now let's wrap the promise safely.
-
-            console.log("DEBUG: calling supabase.from('news_posts')");
-            const fetchPromise = supabase
-                .from('news_posts') // Back to 'news_posts' as requested
-                .select('*')
-                .order('updated_at', { ascending: false })
-                .then(res => res); // Explicitly return the promise
-
-            // specific check for timeout vs fetch
-            const result = await Promise.race([fetchPromise, timeoutPromise]);
-
-            // Supabase returns { data, error } object on success
-            const { data, error } = result;
-
-            console.log("DEBUG: Fetch Result:", { dataReceived: !!data, error: error });
-
-            if (error) {
-                console.error('Error fetching posts:', error);
-                setError(error.message || 'Unknown Supabase Error');
-            } else if (data) {
-                setPosts(data);
-                localStorage.setItem('cached_posts', JSON.stringify(data));
-            }
-
-        } catch (err) {
-            console.error("Fetch failed or timed out:", err);
-            setError(err.message || 'Network/Timeout Error');
-        } finally {
-            console.log("DEBUG: fetchPosts FINALLY block - Setting loading to false");
+        // BYPASS LOGIC:
+        // Force loading to false after 100ms.
+        // This PROVES if we can update the state.
+        setTimeout(() => {
+            console.log("DEBUG: FORCED LOADING FALSE");
             setLoading(false);
-        }
+            setError("DEBUG_BYPASS_COMPLETE");
+        }, 100);
     };
 
     const login = async (email, password) => {
