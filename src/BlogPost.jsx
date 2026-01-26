@@ -9,7 +9,7 @@ import defaultAuthorImg from './assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 import { initialPosts } from './data/initialPosts';
 
 function BlogPost() {
-    const { id } = useParams();
+    const { slug } = useParams();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -17,28 +17,33 @@ function BlogPost() {
         // Fetch specific post
         const fetchPost = async () => {
             setLoading(true);
+
+            // Try fetching by slug
             const { data, error } = await supabase
                 .from('news_posts')
                 .select('*')
-                .eq('id', id)
+                .eq('slug', slug)
                 .single();
 
             if (data) {
                 setPost(data);
             } else {
-                // FALLBACK: Check local initialPosts
-                const localPost = initialPosts.find(p => p.id.toString() === id);
+                // FALLBACK: If slug query failed, try checking against local initialPosts
+                // This is for legacy support or static data
+                const localPost = initialPosts.find(p => p.slug === slug || p.id.toString() === slug);
                 if (localPost) {
                     setPost(localPost);
+                } else {
+                    console.warn(`Post not found for slug: ${slug}`);
                 }
             }
             setLoading(false);
         };
 
-        if (id) {
+        if (slug) {
             fetchPost();
         }
-    }, [id]);
+    }, [slug]);
 
     // Add data-labels to table cells for mobile responsiveness
     useEffect(() => {

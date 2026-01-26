@@ -46,7 +46,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/blog/:id",
+    path: "/blog/:slug",
     element: (
       <Suspense fallback={<LoadingScreen />}>
         <BlogPost />
