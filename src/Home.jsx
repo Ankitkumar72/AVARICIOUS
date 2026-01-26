@@ -51,6 +51,16 @@ function Home() {
     const newsGridRef = useRef(null);
     const { posts, loading, error } = useBlog();
 
+    // Latest Transmissions State
+    const [transmissionOffset, setTransmissionOffset] = useState(0);
+    const TRANSMISSION_ITEMS = 4;
+
+    // Calculate pagination for transmissions
+    const safePosts = posts || [];
+    const totalPages = Math.ceil(safePosts.length / TRANSMISSION_ITEMS);
+    const canGoBack = transmissionOffset > 0;
+    const canGoForward = transmissionOffset < totalPages - 1;
+
     // Boot Sequence State
     const [isBooting, setIsBooting] = useState(() => !sessionStorage.getItem('hasBooted'));
 
@@ -365,24 +375,125 @@ function Home() {
                                     <span style={{ fontWeight: 'bold', letterSpacing: '1px' }}>LATEST TRANSMISSIONS</span>
                                 </div>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button style={{ border: '1px solid #333', width: '30px', height: '30px', display: 'grid', placeItems: 'center' }}>&lt;</button>
-                                    <button style={{ border: '1px solid #333', width: '30px', height: '30px', display: 'grid', placeItems: 'center' }}>&gt;</button>
+                                    <button
+                                        onClick={() => setTransmissionOffset(prev => Math.max(0, prev - 1))}
+                                        disabled={!canGoBack}
+                                        style={{
+                                            border: '1px solid #333',
+                                            width: '30px',
+                                            height: '30px',
+                                            display: 'grid',
+                                            placeItems: 'center',
+                                            cursor: canGoBack ? 'pointer' : 'not-allowed',
+                                            opacity: canGoBack ? 1 : 0.3,
+                                            transition: 'opacity 0.2s',
+                                            color: canGoBack ? 'inherit' : '#333'
+                                        }}
+                                    >
+                                        &lt;
+                                    </button>
+                                    <button
+                                        onClick={() => setTransmissionOffset(prev => Math.min(totalPages - 1, prev + 1))}
+                                        disabled={!canGoForward}
+                                        style={{
+                                            border: '1px solid #333',
+                                            width: '30px',
+                                            height: '30px',
+                                            display: 'grid',
+                                            placeItems: 'center',
+                                            cursor: canGoForward ? 'pointer' : 'not-allowed',
+                                            opacity: canGoForward ? 1 : 0.3,
+                                            transition: 'opacity 0.2s',
+                                            color: canGoForward ? 'inherit' : '#333'
+                                        }}
+                                    >
+                                        &gt;
+                                    </button>
                                 </div>
                             </div>
 
                             <div className="transmissions-grid">
-                                {['INFRASTRUCTURE', 'MANUFACTURING', 'SOFTWARE', 'ORBITAL'].map((tag, i) => (
-                                    <div key={i} className="transmission-item">
-                                        <div style={{ height: '120px', background: '#111', marginBottom: '20px', display: 'grid', placeItems: 'center', color: '#333' }}>[IMG_0{i + 1}]</div>
-                                        <div className="mono text-accent" style={{ fontSize: '0.6rem', marginBottom: '5px' }}>{tag}</div>
-                                        <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>
-                                            {i === 0 && 'Server Farm 09 Overheat'}
-                                            {i === 1 && 'Auto-Assembly Line Stalled'}
-                                            {i === 2 && 'Patch 4.2.1 Deployment'}
-                                            {i === 3 && 'Sat-Link Beta Tests'}
+                                {loading ? (
+                                    // Loading skeleton
+                                    Array(4).fill(0).map((_, i) => (
+                                        <div key={`skeleton-${i}`} className="transmission-item">
+                                            <div style={{ height: '120px', background: '#111', marginBottom: '20px', display: 'grid', placeItems: 'center' }} className="animate-pulse">
+                                                <div className="mono text-[#333] text-xs">LOADING_TRANSMISSION_{i + 1}</div>
+                                            </div>
+                                            <div style={{ height: '10px', background: '#222', width: '60px', marginBottom: '10px' }} className="animate-pulse"></div>
+                                            <div style={{ height: '15px', background: '#222', width: '100%' }} className="animate-pulse"></div>
                                         </div>
+                                    ))
+                                ) : safePosts.slice(transmissionOffset * TRANSMISSION_ITEMS, (transmissionOffset + 1) * TRANSMISSION_ITEMS).length > 0 ? (
+                                    // Display actual posts
+                                    safePosts.slice(transmissionOffset * TRANSMISSION_ITEMS, (transmissionOffset + 1) * TRANSMISSION_ITEMS).map((post, i) => (
+                                        <Link
+                                            key={post.id}
+                                            to={`/blog/${post.id}`}
+                                            className="transmission-item group"
+                                            style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                                        >
+                                            {/* Image Container */}
+                                            <div style={{
+                                                height: '120px',
+                                                background: '#111',
+                                                marginBottom: '20px',
+                                                overflow: 'hidden',
+                                                position: 'relative',
+                                                border: '1px solid #333'
+                                            }} className="group-hover:border-[#00f0ff] transition-colors">
+                                                {post.image_url ? (
+                                                    <img
+                                                        src={post.image_url}
+                                                        alt={post.title}
+                                                        loading="lazy"
+                                                        style={{
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'cover',
+                                                            opacity: 0.8,
+                                                            transition: 'all 0.3s ease',
+                                                            filter: 'grayscale(100%)'
+                                                        }}
+                                                        className="group-hover:opacity-100 group-hover:filter-none"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            e.target.parentElement.innerHTML = '<div style="display:grid;place-items:center;height:100%;color:#333;font-family:monospace;font-size:0.8rem">[IMG_NULL]</div>';
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div style={{
+                                                        display: 'grid',
+                                                        placeItems: 'center',
+                                                        height: '100%',
+                                                        color: '#333',
+                                                        fontFamily: 'monospace',
+                                                        fontSize: '0.8rem'
+                                                    }}>
+                                                        [IMG_{String(i + 1).padStart(2, '0')}]
+                                                    </div>
+                                                )}
+                                                <div className="scanline-overlay absolute inset-0 opacity-20 pointer-events-none"></div>
+                                            </div>
+
+                                            {/* Category Tag */}
+                                            <div className="mono text-accent" style={{ fontSize: '0.6rem', marginBottom: '5px' }}>
+                                                <span className="inline-block w-1 h-1 bg-accent rounded-full mr-2 mb-0.5"></span>
+                                                {(post.category || 'SYSTEM').toUpperCase()}
+                                            </div>
+
+                                            {/* Title */}
+                                            <div style={{ fontWeight: 'bold', fontSize: '0.9rem', lineHeight: '1.3' }} className="group-hover:text-[#00f0ff] transition-colors">
+                                                {post.title}
+                                            </div>
+                                        </Link>
+                                    ))
+                                ) : (
+                                    // Empty state
+                                    <div className="col-span-4 text-center text-secondary mono py-10 text-sm border border-[#333] bg-black/50 p-6">
+                                        NO_ACTIVE_TRANSMISSIONS // STANDBY_MODE
                                     </div>
-                                ))}
+                                )}
                             </div>
 
 
