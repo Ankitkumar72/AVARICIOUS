@@ -43,9 +43,15 @@ export const BlogProvider = ({ children }) => {
     }, []);
 
     const fetchPosts = async () => {
-        console.log("DEBUG: fetchPosts STARTED - SIMPLE VERSION");
+        console.log("DEBUG: fetchPosts STARTED - SAFETY TIMEOUT VERSION");
         setLoading(true);
         setError(null);
+
+        // Safety timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+            console.warn("DEBUG: Fetch timed out - forcing loading false");
+            setLoading(false);
+        }, 5000);
 
         try {
             // Check if supabase client exists
@@ -69,6 +75,12 @@ export const BlogProvider = ({ children }) => {
             if (fetchError) {
                 console.error('Supabase Error:', fetchError);
                 setError(fetchError.message);
+
+                // Fallback to cache on error
+                const cached = localStorage.getItem('cached_posts');
+                if (cached) {
+                    setPosts(JSON.parse(cached));
+                }
             } else if (data) {
                 console.log("DEBUG: Setting posts and caching");
                 setPosts(data);
@@ -78,7 +90,14 @@ export const BlogProvider = ({ children }) => {
         } catch (err) {
             console.error("Fetch Exception:", err);
             setError(err.message || 'Network Error');
+
+            // Fallback to cache on exception
+            const cached = localStorage.getItem('cached_posts');
+            if (cached) {
+                setPosts(JSON.parse(cached));
+            }
         } finally {
+            clearTimeout(timeoutId);
             console.log("DEBUG: Setting loading to false");
             setLoading(false);
         }
