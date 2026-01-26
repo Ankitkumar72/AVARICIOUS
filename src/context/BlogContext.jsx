@@ -40,6 +40,20 @@ export const BlogProvider = ({ children }) => {
         }
 
         fetchPosts();
+
+        // ⚠️ FINAL SAFETY NET: Force loading to false after 6s no matter what
+        // This ensures the app never gets stuck in "Loading" state
+        const safetyNet = setTimeout(() => {
+            setLoading(l => {
+                if (l) {
+                    console.warn("DEBUG: Safety Net triggered - forcing loading=false");
+                    return false;
+                }
+                return l;
+            });
+        }, 6000);
+
+        return () => clearTimeout(safetyNet);
     }, []);
 
     const fetchPosts = async () => {
