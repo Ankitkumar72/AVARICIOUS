@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import defaultAuthorImg from '../assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 
 const NewsGrid = ({ posts, loading, error }) => {
-    // DEBUG OVERLAY
-    if (true) {
+    // DEBUG OVERLAY (Disabled)
+    if (false) {
         return (
             <div className="fixed top-20 left-10 z-[9999] bg-black border border-red-500 p-4 font-mono text-xs text-white max-w-sm">
                 <div className="text-red-500 font-bold mb-2">DEBUG_OVERLAY_V1</div>
