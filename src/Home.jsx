@@ -432,7 +432,7 @@ function Home() {
                                 ) : sortedPosts.length > 0 ? (
                                     // Display actual posts
                                     // Sort by date descending before slicing (Safety check)
-                                    safePosts.slice()
+                                    sortedPosts.slice()
                                         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                                         .slice(transmissionOffset * TRANSMISSION_ITEMS, (transmissionOffset + 1) * TRANSMISSION_ITEMS)
                                         .map((post, i) => (
