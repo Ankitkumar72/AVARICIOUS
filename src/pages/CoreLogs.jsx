@@ -1,190 +1,121 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../Header';
-
-const SOURCE_LOGS = [
-    { msg: 'SYSTEM_INITIALIZATION_COMPLETE', type: 'info' },
-    { msg: 'LOADING_SUBSYSTEMS... [DONE]', type: 'info' },
-    { msg: 'UPDATING NEURAL_SYNAPSE ARCHIVE: 4.2.0-STABLE', type: 'success' },
-    { msg: 'REMOTE_CONNECTION_ESTABLISHED: 192.168.1.104', type: 'info' },
-    { msg: "ENFORCEMENT_BYPASS: ATTEMPT_DETECTED FROM 'PROXY_VALLEY'", type: 'warning' },
-    { msg: 'SCRAPING_PIXY_NEWS_DATABASE ...', type: 'info' },
-    { msg: '3422 RECORDS INDEXED. CACHE_HIT: 98.4%', type: 'info' },
-    { msg: 'ALERT: CORE_LOGS_SYNC_REQD', type: 'alert' },
-    { msg: 'HEARTBEAT_ACK FROM_REDUNDANT_SERVER_02', type: 'info' },
-    { msg: '-- IDLE_PROCESS_RUNNING --', type: 'dim' },
-    { msg: 'RUNNING_CMD: GET_CORE_STABILITY', type: 'info' },
-    { msg: 'SYSTEM_MONITOR_TICK', type: 'dim' },
-    { msg: 'SYSTEM_MONITOR_TICK', type: 'dim' },
-    { msg: 'SYSTEM_MONITOR_TICK', type: 'dim' },
-    { msg: 'FAILED_AUTH: ROOT_ACCESS_REJECTED', type: 'error' },
-    { msg: 'RE-ESTABLISHING ENCRYPTION_LAYER_7', type: 'info' },
-];
-
-const MAX_LINES = 16; // Keep the list fixed to this size to prevent scrolling
+import { useBlog } from '../context/BlogContext';
+import defaultCyborg from '../assets/ai-generated-8343518_1920.jpg';
 
 const CoreLogs = () => {
-    const [logs, setLogs] = useState([]);
-    const [uptime, setUptime] = useState({ d: 142, h: 22, m: 18, s: 4 });
+    const { posts, loading, fetchPosts } = useBlog();
+    const [displayLimit, setDisplayLimit] = useState(4);
 
-    // Initial Load
+    // Force data refresh on visit to ensure new posts appear
     useEffect(() => {
-        const initial = SOURCE_LOGS.map((log, i) => {
-            const date = new Date();
-            date.setSeconds(date.getSeconds() - (SOURCE_LOGS.length - i) * 5);
-            const timeStr = date.toLocaleTimeString('en-US', { hour12: false });
-            return { ...log, time: timeStr };
-        });
-        setLogs(initial.slice(-MAX_LINES)); // Ensure we start with max lines
+        fetchPosts();
     }, []);
-
-    // Uptime ticker
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setUptime(prev => {
-                let { d, h, m, s } = prev;
-                s++;
-                if (s >= 60) { s = 0; m++; }
-                if (m >= 60) { m = 0; h++; }
-                if (h >= 24) { h = 0; d++; }
-                return { d, h, m, s };
-            });
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
-
-    // Infinite Loop (Sliding Window)
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setLogs(prev => {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString('en-US', { hour12: false });
-
-                // Pick random log
-                const randomLogTemplate = SOURCE_LOGS[Math.floor(Math.random() * SOURCE_LOGS.length)];
-                const newLog = { ...randomLogTemplate, time: timeString };
-
-                // Add new, remove old (Sliding Window)
-                const newLogs = [...prev, newLog];
-                return newLogs.slice(-MAX_LINES);
-            });
-        }, 2000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const formatUptime = ({ d, h, m, s }) => {
-        return `${d}:${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    };
 
     return (
-        <div className="app-main-wrapper" style={{ alignItems: 'flex-start', paddingTop: '0' }}>
-            <div className="app-layout" style={{ minHeight: '100vh', border: 'none' }}>
+        <div className="app-main-wrapper" style={{ background: '#020202', color: '#ccc' }}>
+            <div className="app-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
-                <Header />
+                {/* Header (Minimal) */}
+                <Header minimal={true} />
 
-                {/* Main Content Grid with Responsive Classes */}
-                <div className="core-logs-container">
-
-                    {/* Left: Logs (Fixed Height, No Scroll, Top Aligned) */}
-                    <div className="core-logs-list" style={{ overflow: 'hidden' }}>
-                        {logs.map((log, i) => (
-                            <div key={i} className="core-log-entry">
-                                <span className="log-timestamp">[{log.time}]</span>
-                                <span style={{
-                                    color: log.type === 'error' ? '#ff3333' :
-                                        log.type === 'success' ? '#00ff00' :
-                                            log.type === 'warning' ? '#ffcc00' :
-                                                log.type === 'alert' ? 'white' :
-                                                    log.type === 'dim' ? '#444' : '#aaa',
-                                    fontWeight: log.type === 'alert' ? 'bold' : 'normal',
-                                    wordBreak: 'break-word'
-                                }}>
-                                    {log.msg}
-                                </span>
-                            </div>
-                        ))}
-                        <div style={{ display: 'flex', gap: '20px' }}>
-                            <span style={{ color: '#666' }}>[{new Date().toLocaleTimeString('en-US', { hour12: false })}]</span>
-                            <span className="blinking-cursor" style={{ color: '#00f0ff' }}>_</span>
+                {/* Page Title Section - Terminal Style */}
+                {/* Page Title Section - Terminal Style */}
+                <div className="flex flex-col md:flex-row justify-between md:items-center px-6 md:px-[60px] py-8 md:py-[40px] border-b border-[#222] gap-6">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-2 h-2 bg-blue-500"></div>
+                            <span className="mono text-xs text-secondary">SYSTEM_VIEW: LIST_MODE</span>
                         </div>
+                        <h1 className="hero-title text-4xl md:text-[3rem] tracking-tight m-0">ARCHIVE_LOGS</h1>
                     </div>
-
-                    {/* Right: Sidebar */}
-                    <div className="core-logs-sidebar">
-                        <div style={{ padding: '40px' }}>
-                            <div className="mono" style={{ fontSize: '0.8rem', letterSpacing: '2px', color: '#666', marginBottom: '30px' }}>SYSTEM_METRICS</div>
-
-                            <div style={{ marginBottom: '30px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                                    <span>CORE_STABILITY</span>
-                                    <span>99.98%</span>
-                                </div>
-                                <div style={{ height: '2px', background: '#333', width: '100%' }}>
-                                    <div style={{ width: '99%', height: '100%', background: 'white' }}></div>
-                                </div>
-                            </div>
-
-                            <div style={{ marginBottom: '30px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                                    <span>NEURAL_LOAD</span>
-                                    <span>14.2%</span>
-                                </div>
-                                <div style={{ height: '2px', background: '#333', width: '100%' }}>
-                                    <div style={{ width: '14%', height: '100%', background: 'white' }}></div>
-                                </div>
-                            </div>
-
-                            <div style={{ marginBottom: '30px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                                    <span>MEMORY_BUFFER</span>
-                                    <span>8GB / 64GB</span>
-                                </div>
-                                <div style={{ height: '2px', background: '#333', width: '100%' }}>
-                                    <div style={{ width: '12%', height: '100%', background: 'white' }}></div>
-                                </div>
-                            </div>
-
-                            <div style={{ marginTop: '80px' }}>
-                                <div className="mono" style={{ fontSize: '0.8rem', letterSpacing: '2px', color: '#666', marginBottom: '20px' }}>SYSTEM_UPTIME</div>
-                                <div style={{ fontSize: '2.5rem', fontFamily: 'monospace', color: 'white' }}>
-                                    {formatUptime(uptime)}
-                                </div>
-                                <div className="mono" style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px' }}>D:H:M:S</div>
-                            </div>
-                        </div>
-
-                        <div style={{
-                            position: 'absolute',
-                            bottom: '40px',
-                            left: '40px',
-                            right: '40px',
-                            border: '1px solid #333',
-                            padding: '20px',
-                            backgroundColor: '#080808'
-                        }} className="hide-on-mobile">
-                            <div className="mono" style={{ fontSize: '0.7rem', color: '#888', marginBottom: '10px' }}>KERNEL_STATUS</div>
-                            <div className="mono" style={{ fontSize: '0.7rem', color: '#666', lineHeight: '1.6' }}>
-                                ARCH: x86_64<br />
-                                SEC: AES-256-GCM<br />
-                                MODE: HIGH_PRECISION
-                            </div>
-                        </div>
+                    <div className="mono text-left md:text-right text-xs text-secondary leading-loose">
+                        <div>SERVER_TIME: 23:42:01 UTC</div>
+                        <div>NODE: US-EAST-4</div>
+                        <div>CONN_STATUS: SECURE</div>
                     </div>
                 </div>
 
-                {/* Footer Bar */}
-                {/* Footer Bar */}
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#444' }} className="mono responsive-footer">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00ff00' }}></div>
-                        <span style={{ color: '#666' }}>NETWORK_ONLINE</span>
-                        <span style={{ marginLeft: '20px' }}>LATENCY: 14MS</span>
-                    </div>
-                    <div>© 2083 PIXY_GLOBAL_CONGLOMERATE // ALL RIGHTS RESERVED</div>
+                {/* Column Headers */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-16 py-4 border-b border-white/5 mono text-xs text-secondary uppercase tracking-wider">
+                    <div className="col-span-2">Visual_Ref</div>
+                    <div className="col-span-8">Log_Abstract</div>
+                    <div className="col-span-2 text-right">Meta_Data</div>
                 </div>
 
+                {/* List Container */}
+                <div className="archive-list-container flex-1">
+                    {posts.length > 0 ? (
+                        postItems(posts, displayLimit)
+                    ) : (
+                        <div className="p-20 text-center mono text-secondary">ARCHIVES_EMPTY</div>
+                    )}
+                </div>
+
+                {/* Footer Controls */}
+                <div className="p-10 border-t border-white/10 flex flex-col items-center gap-4 mt-auto">
+                    <div className="mono text-xs text-secondary tracking-widest">
+                        DISPLAYING {Math.min(displayLimit, posts.length)} OF {posts.length} LOCAL RECORDS
+                    </div>
+                    {displayLimit < posts.length && (
+                        <button
+                            onClick={() => setDisplayLimit(prev => prev + 4)}
+                            className="mono border border-white/20 px-8 py-3 text-xs hover:bg-white/10 transition-colors flex items-center gap-2"
+                        >
+                            <span className="animate-spin-slow">⟳</span> LOAD_MORE_LOGS
+                        </button>
+                    )}
+                </div>
+
+                {/* Bottom Bar */}
+                <div className="px-10 py-4 flex justify-between mono text-[0.6rem] text-secondary border-t border-white/5">
+                    <Link to="/" className="hover:text-white"> &lt;&lt; TERMINATE_UPLINK_&_RETREAT </Link>
+                </div>
             </div>
         </div>
     );
+};
+
+// Helper function to render list items
+const postItems = (posts, limit) => {
+    return posts.slice(0, limit).map((post) => (
+        <div key={post.id} className="group grid grid-cols-1 md:grid-cols-12 gap-6 px-6 md:px-16 py-10 border-b border-white/5 hover:bg-white/[0.02] transition-colors relative">
+
+            {/* Visual Ref (Thumbnail) */}
+            <div className="col-span-2 relative">
+                <div className="aspect-square w-full md:w-32 overflow-hidden border border-white/10 grayscale group-hover:grayscale-0 transition-all duration-500">
+                    <img
+                        src={post.image_url || defaultCyborg}
+                        alt="Visual"
+                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-transform"
+                    />
+                    {/* Scanline overlay */}
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiAvPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIC8+Cjwvc3ZnPg==')] opacity-50 pointer-events-none"></div>
+                </div>
+            </div>
+
+            {/* Log Abstract */}
+            <div className="col-span-8 flex flex-col justify-center">
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-3 group-hover:text-accent transition-colors">
+                    <Link to={`/blog/${post.slug || post.id}`}>{post.title.toUpperCase()}</Link>
+                </h2>
+                <div className="mono text-sm text-secondary leading-relaxed max-w-3xl">
+                    <span className="text-accent/50 mr-2">// ABSTRACT:</span>
+                    {post.content ? post.content.substring(0, 160).replace(/[#*]/g, '') + '...' : 'Data corrupted or encrypted. Access full log for decryption.'}
+                </div>
+            </div>
+
+            {/* Meta Data */}
+            <div className="col-span-2 flex flex-col justify-center md:items-end text-left md:text-right mono text-xs gap-1 text-secondary">
+                <div className="text-accent mb-1">ID: {String(post.id).padStart(4, '0')}</div>
+                <div>DATE: {post.updated_at ? new Date(post.updated_at).toLocaleDateString().replace(/\//g, '.') : 'UNKNOWN'}</div>
+                <div>COORD: {post.coordinates || '34.052°N, 118.243°W'}</div>
+            </div>
+
+        </div>
+    ));
 };
 
 export default CoreLogs;

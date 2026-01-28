@@ -1,12 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import mermaid from 'mermaid';
 import './index.css';
 import { Link, useParams } from 'react-router-dom';
 import Header from './Header';
 import { supabase } from './supabaseClient';
 import defaultAuthorImg from './assets/8machine-_-Jw7p2A369As-unsplash.jpg';
 import { initialPosts } from './data/initialPosts';
+
+// Initialize Mermaid
+mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+        primaryColor: '#00f0ff',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#00f0ff',
+        lineColor: '#00f0ff',
+        secondaryColor: '#1a1a1a',
+        tertiaryColor: '#2a2a2a'
+    }
+});
+
+// Custom component for rendering mermaid diagrams
+const MermaidDiagram = ({ chart }) => {
+    const [svg, setSvg] = useState('');
+    const [id] = useState(`mermaid-${Math.random().toString(36).substr(2, 9)}`);
+
+    useEffect(() => {
+        if (chart) {
+            mermaid.render(id, chart).then(({ svg }) => {
+                setSvg(svg);
+            }).catch(err => {
+                console.error('Mermaid render error:', err);
+            });
+        }
+    }, [chart, id]);
+
+    return <div dangerouslySetInnerHTML={{ __html: svg }} className="mermaid-diagram" />;
+};
 
 function BlogPost() {
     const { slug } = useParams();
@@ -18,17 +51,29 @@ function BlogPost() {
         const fetchPost = async () => {
             setLoading(true);
 
-            // Try fetching by slug
-            const { data, error } = await supabase
+            // Try fetching by slug first
+            let { data, error } = await supabase
                 .from('news_posts')
                 .select('*')
                 .eq('slug', slug)
                 .single();
 
+            // If slug lookup failed, try by ID (for posts without slugs)
+            if (!data) {
+                const idLookup = await supabase
+                    .from('news_posts')
+                    .select('*')
+                    .eq('id', slug)
+                    .single();
+
+                data = idLookup.data;
+                error = idLookup.error;
+            }
+
             if (data) {
                 setPost(data);
             } else {
-                // FALLBACK: If slug query failed, try checking against local initialPosts
+                // FALLBACK: If database queries failed, try checking against local initialPosts
                 // This is for legacy support or static data
                 const localPost = initialPosts.find(p => p.slug === slug || p.id.toString() === slug);
                 if (localPost) {
@@ -80,7 +125,7 @@ function BlogPost() {
     if (!post) {
         return (
             <div className="app-main-wrapper" style={{ display: 'grid', placeItems: 'center', height: '100vh', color: 'red' }}>
-                <div className="mono">ERROR: FILE_NOT_FOUND [{id}]</div>
+                <div className="mono">ERROR: FILE_NOT_FOUND [{slug}]</div>
             </div>
         );
     }
@@ -122,10 +167,10 @@ function BlogPost() {
                                         <span>{post.author || 'UNIT_ADMIN'}</span>
                                     </div>
                                 </div>
-                                <div className="meta-item">
+                                {/* <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>TIMESTAMP (UTC)</div>
                                     <div>{new Date(post.updated_at).toLocaleDateString()}<br />{new Date(post.updated_at).toLocaleTimeString()}</div>
-                                </div>
+                                </div> */}
                                 <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>COORDINATES</div>
                                     <div>{post.coordinates || 'UNKNOWN'}</div>
@@ -143,10 +188,56 @@ function BlogPost() {
                     </aside>
 
                     {/* Main Article Content */}
-                    <main style={{ padding: '60px', borderRight: '1px solid var(--grid-color)' }}>
+                    <main style={{ paddingTop: '30px', paddingLeft: '60px', paddingRight: '60px', paddingBottom: '60px', borderRight: '1px solid var(--grid-color)' }}>
+
+                        {/* Article Metadata - Shows custom timestamp and parsed metadata */}
+                        {(post.custom_timestamp || metadata.status || metadata.countdown) && (
+                            <div className="mono" style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid var(--grid-color)' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', fontSize: '0.85rem' }}>
+                                    {post.custom_timestamp && (
+                                        <div>
+                                            <div className="text-secondary" style={{ marginBottom: '5px' }}>TIMESTAMP:</div>
+                                            <div className="text-accent">{post.custom_timestamp}</div>
+                                        </div>
+                                    )}
+                                    {metadata.status && (
+                                        <div>
+                                            <div className="text-secondary" style={{ marginBottom: '5px' }}>STATUS:</div>
+                                            <div>{metadata.status}</div>
+                                        </div>
+                                    )}
+                                    {metadata.countdown && (
+                                        <div style={{ gridColumn: '1 / -1' }}>
+                                            <div className="text-secondary" style={{ marginBottom: '5px' }}>COUNTDOWN:</div>
+                                            <div className="text-accent" style={{ fontSize: '0.9rem' }}>{metadata.countdown}</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="markdown-content">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                    code({ node, inline, className, children, ...props }) {
+                                        const match = /language-(\w+)/.exec(className || '');
+                                        const language = match ? match[1] : '';
+
+                                        // Render Mermaid diagrams
+                                        if (language === 'mermaid') {
+                                            return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
+                                        }
+
+                                        // Regular code blocks
+                                        return (
+                                            <code className={className} {...props}>
+                                                {children}
+                                            </code>
+                                        );
+                                    }
+                                }}
+                            >
                                 {post.content}
                             </ReactMarkdown>
                         </div>

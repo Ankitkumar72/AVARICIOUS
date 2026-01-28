@@ -52,19 +52,6 @@ function Home() {
     const newsGridRef = useRef(null);
     const { posts, loading, error } = useBlog();
 
-    // Latest Transmissions State
-    // Latest Transmissions State
-    const [transmissionOffset, setTransmissionOffset] = useState(0);
-    const TRANSMISSION_ITEMS = 4;
-
-    // Sort posts by created_at DESC for Latest Transmissions
-    // NOTE: BlogContext returns posts sorted by updated_at, so we force created_at sort here
-    const sortedPosts = [...(posts || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    const totalPages = Math.ceil(sortedPosts.length / TRANSMISSION_ITEMS);
-
-    // Pagination Controls
-    const canGoBack = transmissionOffset > 0;
-    const canGoForward = transmissionOffset < totalPages - 1;
 
     // Boot Sequence State
     const [isBooting, setIsBooting] = useState(() => !sessionStorage.getItem('hasBooted'));
@@ -94,9 +81,9 @@ function Home() {
     }, []);
 
     const handleJoin = async () => {
-        // 1. Validation
-        if (!formData.email.includes('@') || !formData.identityHash || !formData.accessKey) {
-            alert("INVALID_SIGNAL: ALL FIELDS REQUIRED.");
+        // 1. Validation (Only email now)
+        if (!formData.email.includes('@')) {
+            alert("INVALID_SIGNAL: VALID EMAIL REQUIRED.");
             return;
         }
 
@@ -109,16 +96,15 @@ function Home() {
                 const { error } = await supabase
                     .from('collective_members')
                     .insert([{
-                        identity_hash: formData.identityHash,
-                        access_key: formData.accessKey,
-                        node_origin: formData.nodeOrigin,
-                        latency_pref: formData.latencyPref,
-                        email: formData.email
+                        email: formData.email,
+                        identity_hash: formData.email.split('@')[0], // Use email prefix as identity
+                        node_origin: 'SECTOR_07',
+                        latency_pref: 'STANDARD'
                     }]);
 
                 if (error) {
                     if (error.code === '23505') { // Unique violation
-                        alert("SIGNAL_COLLISION: IDENTITY_HASH_ALREADY_ACTIVE");
+                        alert("SIGNAL_COLLISION: EMAIL_ALREADY_REGISTERED");
                     } else {
                         throw error;
                     }
@@ -269,9 +255,6 @@ function Home() {
                             </div>
                         </section>
 
-                        {/* News Grid */}
-                        <NewsGrid posts={filteredNews} loading={loading} error={error} ref={newsGridRef} />
-
                         {/* Subscription Section (RENAMED: JOIN THE COLLECTIVE) */}
                         <section className="subscription-section relative">
                             <div className="absolute top-0 right-0 p-4 font-mono text-xs text-secondary opacity-50">
@@ -284,85 +267,28 @@ function Home() {
                             {joinState === 'JOINED' ? (
                                 <div className="border border-[#00f0ff] bg-[#00f0ff]/10 p-6 text-center animate-pulse">
                                     <div className="text-[#00f0ff] font-mono font-bold text-xl mb-2">ACCESS GRANTED</div>
-                                    <div className="text-[#00f0ff] font-mono text-sm">HASH_ID: {formData.identityHash.toUpperCase()}</div>
+                                    <div className="text-[#00f0ff] font-mono text-sm">ID: {formData.email}</div>
                                     <div className="text-gray-400 font-mono text-xs mt-2">AWAITING CLANDESTINE BURST...</div>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-[600px] relative z-10 p-6 border border-[#333] bg-black/50 backdrop-blur-md">
+                                <div className="flex items-center gap-4 w-full max-w-[700px] relative z-10 p-6 border border-[#333] bg-black/50 backdrop-blur-md">
+                                    {/* Single Email Input */}
+                                    <input
+                                        type="email"
+                                        placeholder="ENTER_ID_KEY"
+                                        className="flex-1 bg-transparent border border-[#333] p-4 text-secondary font-mono outline-none focus:border-[#00f0ff] text-sm placeholder:text-secondary/50"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                                    />
 
-                                    {/* IDENTITY HASH */}
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-[10px] font-mono text-secondary">IDENTITY_HASH</label>
-                                        <input
-                                            type="text"
-                                            placeholder="USER_NAME_ALPHA"
-                                            className="bg-transparent border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
-                                            value={formData.identityHash}
-                                            onChange={(e) => setFormData({ ...formData, identityHash: e.target.value })}
-                                        />
-                                    </div>
-
-                                    {/* ACCESS KEY */}
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-[10px] font-mono text-secondary">ACCESS_KEY</label>
-                                        <input
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="bg-transparent border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
-                                            value={formData.accessKey}
-                                            onChange={(e) => setFormData({ ...formData, accessKey: e.target.value })}
-                                        />
-                                    </div>
-
-                                    {/* NODE ORIGIN */}
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-[10px] font-mono text-secondary">NODE_ORIGIN</label>
-                                        <select
-                                            className="bg-black border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
-                                            value={formData.nodeOrigin}
-                                            onChange={(e) => setFormData({ ...formData, nodeOrigin: e.target.value })}
-                                        >
-                                            <option value="SECTOR_07">SECTOR 07 (Ruins)</option>
-                                            <option value="NEO_TOKYO">NEO TOKYO (Core)</option>
-                                            <option value="LUNAR_COLONY">LUNAR COLONY</option>
-                                            <option value="UNKNOWN">UNKNOWN PROXY</option>
-                                        </select>
-                                    </div>
-
-                                    {/* LATENCY PREF */}
-                                    <div className="flex flex-col gap-1">
-                                        <label className="text-[10px] font-mono text-secondary">LATENCY_PREF</label>
-                                        <select
-                                            className="bg-black border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
-                                            value={formData.latencyPref}
-                                            onChange={(e) => setFormData({ ...formData, latencyPref: e.target.value })}
-                                        >
-                                            <option value="ULTRA_LOW">ULTRA_LOW (Risk: High)</option>
-                                            <option value="STANDARD">STANDARD (Masked)</option>
-                                            <option value="HIGH">HIGH (Tor/VPN)</option>
-                                        </select>
-                                    </div>
-
-                                    {/* EMAIL (FULL CONSTANT CONTACT) */}
-                                    <div className="col-span-1 md:col-span-2 flex flex-col gap-1 mt-2">
-                                        <label className="text-[10px] font-mono text-secondary">FREQUENCY_LOCK (EMAIL)</label>
-                                        <input
-                                            type="email"
-                                            placeholder="email@provider.com"
-                                            className="bg-transparent border border-[#333] p-3 text-[#00f0ff] font-mono outline-none focus:border-[#00f0ff]"
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-                                        />
-                                    </div>
-
-                                    {/* SUBMIT */}
+                                    {/* Submit Button */}
                                     <button
                                         type="button"
                                         onClick={handleJoin}
-                                        className="col-span-1 md:col-span-2 bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff] py-4 mt-2 font-bold hover:bg-[#00f0ff] hover:text-black transition-all uppercase tracking-widest"
+                                        className="bg-white text-black border-none px-8 py-4 font-bold hover:bg-gray-200 transition-all uppercase tracking-widest text-sm"
                                     >
-                                        {joinState === 'HACKING' ? 'ESTABLISHING HANDSHAKE...' : 'INITIATE_UPLINK'}
+                                        {joinState === 'HACKING' ? 'CONNECTING...' : 'CONNECT'}
                                     </button>
                                 </div>
                             )}
@@ -372,82 +298,6 @@ function Home() {
                             <div className="deco-line right"></div>
                         </section>
 
-                        {/* Latest Transmissions */}
-                        <section style={{ borderBottom: '1px solid var(--grid-color)' }}>
-                            <div className="transmissions-header">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ width: '6px', height: '6px', background: '#00f0ff' }}></div>
-                                    <span style={{ fontWeight: 'bold', letterSpacing: '1px' }}>LATEST TRANSMISSIONS</span>
-                                </div>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button
-                                        onClick={() => setTransmissionOffset(prev => Math.max(0, prev - 1))}
-                                        disabled={!canGoBack}
-                                        style={{
-                                            border: '1px solid #333',
-                                            width: '30px',
-                                            height: '30px',
-                                            display: 'grid',
-                                            placeItems: 'center',
-                                            cursor: canGoBack ? 'pointer' : 'not-allowed',
-                                            opacity: canGoBack ? 1 : 0.3,
-                                            transition: 'opacity 0.2s',
-                                            color: canGoBack ? 'inherit' : '#333'
-                                        }}
-                                    >
-                                        &lt;
-                                    </button>
-                                    <button
-                                        onClick={() => setTransmissionOffset(prev => Math.min(totalPages - 1, prev + 1))}
-                                        disabled={!canGoForward}
-                                        style={{
-                                            border: '1px solid #333',
-                                            width: '30px',
-                                            height: '30px',
-                                            display: 'grid',
-                                            placeItems: 'center',
-                                            cursor: canGoForward ? 'pointer' : 'not-allowed',
-                                            opacity: canGoForward ? 1 : 0.3,
-                                            transition: 'opacity 0.2s',
-                                            color: canGoForward ? 'inherit' : '#333'
-                                        }}
-                                    >
-                                        &gt;
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="transmissions-grid">
-                                {loading ? (
-                                    // Loading skeleton (matches TransmissionCard height)
-                                    Array(4).fill(0).map((_, i) => (
-                                        <div key={`skeleton-${i}`} className="transmission-item">
-                                            <div style={{ height: '120px', background: '#111', marginBottom: '20px', display: 'grid', placeItems: 'center', border: '1px solid #333' }} className="animate-pulse">
-                                                <div className="mono text-[#333] text-xs">LOADING_TRANSMISSION_{i + 1}</div>
-                                            </div>
-                                            <div style={{ height: '10px', background: '#222', width: '60px', marginBottom: '10px' }} className="animate-pulse"></div>
-                                            <div style={{ height: '15px', background: '#222', width: '100%' }} className="animate-pulse"></div>
-                                        </div>
-                                    ))
-                                ) : sortedPosts.length > 0 ? (
-                                    // Display actual posts
-                                    // Sort by date descending before slicing (Safety check)
-                                    sortedPosts.slice()
-                                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                                        .slice(transmissionOffset * TRANSMISSION_ITEMS, (transmissionOffset + 1) * TRANSMISSION_ITEMS)
-                                        .map((post) => (
-                                            <TransmissionCard key={post.id} post={post} />
-                                        ))
-                                ) : (
-                                    // Empty state
-                                    <div className="col-span-4 text-center text-secondary mono py-10 text-sm border border-[#333] bg-black/50 p-6">
-                                        NO_ACTIVE_TRANSMISSIONS // STANDBY_MODE
-                                    </div>
-                                )}
-                            </div>
-
-
-                        </section>
 
                         {/* Footer */}
                         <Footer />

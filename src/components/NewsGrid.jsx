@@ -82,21 +82,9 @@ const NewsGrid = ({ posts, loading, error }) => {
 
                             {/* Content */}
                             <div className="flex flex-1 flex-col p-5">
-                                <div className="mb-3 flex items-center justify-between text-[10px] font-mono text-secondary">
-                                    <div className="flex items-center gap-2">
-                                        <img src={defaultAuthorImg} alt="Author" className="w-5 h-5 rounded-full object-cover" />
-                                        <span>ID: {String(news.id).toUpperCase().slice(0, 8)}</span>
-                                    </div>
-                                    <span>{news.updated_at ? new Date(news.updated_at).toLocaleDateString() : 'N/A'}</span>
-                                </div>
-
                                 <h3 className="mb-3 text-lg font-bold leading-tight text-white transition-colors group-hover:text-accent text-glitch">
                                     {news.title}
                                 </h3>
-
-                                <p className="mb-4 text-xs leading-relaxed text-gray-400 line-clamp-3">
-                                    {news.content?.replace(/[#*]/g, '') || 'No content preview available.'}
-                                </p>
 
                                 <div className="mt-auto flex items-center gap-2 text-[10px] font-mono text-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                                     <span>ACCESS_FILE</span>

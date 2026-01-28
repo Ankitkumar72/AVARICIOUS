@@ -1,296 +1,417 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useBlog } from '../context/BlogContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import Header from '../Header';
 import { supabase } from '../supabaseClient';
+import { uploadImageToSupabase } from '../utils/imageUpload';
+import Header from '../Header';
+import './EditorConsole.css';
 
 const EditPost = () => {
     const { id } = useParams();
-    const { user, getPost, fetchPosts } = useBlog(); // Create context link
     const navigate = useNavigate();
+    const { currentUser } = useBlog();
+    const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const contentTextareaRef = useRef(null);
+    const imageUrlInputRef = useRef(null);
 
+    // Form state
     const [title, setTitle] = useState('');
+    const [slug, setSlug] = useState('');
+    const [category, setCategory] = useState('');
     const [content, setContent] = useState('');
-    const [coordinates, setCoordinates] = useState('');
     const [imageUrl, setImageUrl] = useState('');
-    const [status, setStatus] = useState('IDLE'); // IDLE, SENDING, SUCCESS, ERROR
-    const [lastUploadedPath, setLastUploadedPath] = useState(null); // Track replacement
+    const [coordinates, setCoordinates] = useState('');
+    const [author, setAuthor] = useState('');
+    const [customTimestamp, setCustomTimestamp] = useState('');
+    const [isPublished, setIsPublished] = useState(false);
 
+    // Auto-generate slug from title
     useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            // return; // In a real app, redirection would happen. For dev, maybe we allow viewing.
+        if (title && !slug) {
+            const generatedSlug = title
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+            setSlug(generatedSlug);
         }
+    }, [title, slug]);
 
-        if (id) {
-            fetchPostData(id);
-        }
-    }, [id, user, navigate]);
+    // Fetch post if editing
+    useEffect(() => {
+        const fetchPostData = async () => {
+            if (!id || id === 'new') return;
 
-    const fetchPostData = async (postId) => {
-        const { data, error } = await supabase
-            .from('news_posts')
-            .select('*')
-            .eq('id', postId)
-            .single();
+            try {
+                const { data, error } = await supabase
+                    .from('news_posts')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
 
-        if (data) {
-            setTitle(data.title);
-            setContent(data.content);
-            setCoordinates(data.coordinates || '');
-            setImageUrl(data.image_url || '');
-        }
-    };
+                if (error) throw error;
 
-    const handleImageUpload = async (file) => {
-        // CLEANUP: If user uploads multiple times, remove the previous "draft" upload to save space
-        if (lastUploadedPath) {
-            await supabase.storage.from('blog_assets').remove([lastUploadedPath]);
-        }
-
-        setStatus('UPLOADING');
-        try {
-            const fileExt = file.name.split('.').pop() || 'png';
-            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const filePath = `uploads/${fileName}`;
-
-            const { data, error } = await supabase.storage
-                .from('blog_assets')
-                .upload(filePath, file);
-
-            if (error) throw error;
-
-            // Track this path so we can replace it if they upload again
-            setLastUploadedPath(filePath);
-
-            // Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('blog_assets')
-                .getPublicUrl(filePath);
-
-            setImageUrl(publicUrl);
-            setStatus('IDLE');
-        } catch (error) {
-            console.error('Upload Error:', error);
-            setStatus('ERROR');
-            if (/bucket not found/i.test(error.message) || error.code === '42P01') {
-                alert('STORAGE ERROR: Bucket "blog_assets" not found.\n\nACTION REQUIRED:\n1. Open Supabase SQL Editor.\n2. Run the "src/storage_setup.sql" script.');
-            } else {
-                alert(`Upload Failed: ${error.message}`);
+                if (data) {
+                    setTitle(data.title || '');
+                    setSlug(data.slug || '');
+                    setCategory(data.category || '');
+                    setContent(data.content || '');
+                    setImageUrl(data.image_url || '');
+                    setCoordinates(data.coordinates || '');
+                    setAuthor(data.author || '');
+                    setCustomTimestamp(data.custom_timestamp || '');
+                    setIsPublished(data.is_published || false);
+                }
+            } catch (error) {
+                console.error('Error fetching post:', error);
+                alert('Failed to load post');
             }
-        }
-    };
-
-    const handlePublish = async () => {
-        setStatus('SENDING');
-
-        // Dynamic upsert payload
-        const payload = {
-            title,
-            content,
-            coordinates,
-            image_url: imageUrl,
-            updated_at: new Date(new Date().setFullYear(new Date().getFullYear() + 57)).toISOString(),
         };
 
-        if (id) payload.id = id;
+        fetchPostData();
+    }, [id]);
 
-        const { data, error } = await supabase
-            .from('news_posts')
-            .upsert(payload)
-            .select();
+    // Save post function
+    const savePost = async (publishStatus) => {
+        if (!title || !content) {
+            alert('Title and content are required');
+            return;
+        }
 
-        if (error) {
-            console.error('Transmission Failed:', error);
-            setStatus('ERROR');
-            if (error.message.includes('Could not find the table') || error.code === '42P01') {
-                alert('DB ERROR: Table "news_posts" not found.\n\nACTION REQUIRED:\n1. Go to your Supabase Dashboard.\n2. Open the SQL Editor.\n3. Copy/Paste the contents of "src/db_setup.sql" and run it.');
+        setSaving(true);
+
+        try {
+            const postData = {
+                title,
+                slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                category,
+                content,
+                image_url: imageUrl,
+                coordinates,
+                author: author || currentUser?.email || 'Anonymous',
+                custom_timestamp: customTimestamp,
+                is_published: publishStatus,
+                updated_at: new Date().toISOString()
+            };
+
+            let result;
+            if (id && id !== 'new') {
+                // Update existing post
+                result = await supabase
+                    .from('news_posts')
+                    .update(postData)
+                    .eq('id', id)
+                    .select();
             } else {
-                alert(`Error: ${error.message}`);
+                // Create new post
+                postData.created_at = new Date().toISOString();
+                result = await supabase
+                    .from('news_posts')
+                    .insert([postData])
+                    .select();
             }
-        } else {
-            setStatus('SUCCESS');
-            alert('Transmission Successful: Story Synchronized.');
-            fetchPosts(); // REFRESH DATA IMMEDIATELY
-            if (!id && data[0]?.id) {
-                navigate(`/editor/${data[0].id}`); // Switch to edit mode for the new post
+
+            if (result.error) throw result.error;
+
+            alert(publishStatus ? 'Post published successfully!' : 'Draft saved successfully!');
+
+            if (id === 'new' && result.data && result.data[0]) {
+                navigate(`/edit/${result.data[0].id}`);
+            }
+        } catch (error) {
+            console.error('Save error:', error);
+            alert('Failed to save post: ' + error.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSaveDraft = () => savePost(false);
+    const handlePublish = () => {
+        if (confirm('Are you sure you want to publish this post?')) {
+            savePost(true);
+        }
+    };
+
+    // Handle paste event for clipboard images
+    const handlePaste = async (e) => {
+        console.log('PASTE EVENT DETECTED');
+        const items = e.clipboardData?.items;
+        if (!items) {
+            console.log('No clipboard items found');
+            return;
+        }
+
+        console.log('Clipboard items:', items.length);
+
+        // Check if clipboard contains an image
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            console.log(`Item ${i} type:`, item.type);
+
+            if (item.type.startsWith('image/')) {
+                console.log('IMAGE DETECTED! Processing...');
+                e.preventDefault(); // Prevent default paste behavior for images
+
+                const file = item.getAsFile();
+                if (!file) {
+                    console.log('Failed to get file from clipboard item');
+                    continue;
+                }
+
+                console.log('File details:', { name: file.name, type: file.type, size: file.size });
+                setUploading(true);
+
+                try {
+                    console.log('Starting upload to Supabase...');
+                    // Upload image to Supabase
+                    const { url, error } = await uploadImageToSupabase(file);
+
+                    if (error) {
+                        console.error('Upload failed:', error);
+                        alert('Failed to upload image: ' + error);
+                        return;
+                    }
+
+                    console.log('Upload successful! URL:', url);
+
+                    // Insert markdown image syntax at cursor position
+                    const textarea = contentTextareaRef.current;
+                    if (textarea) {
+                        const cursorPos = textarea.selectionStart;
+                        const textBefore = content.substring(0, cursorPos);
+                        const textAfter = content.substring(cursorPos);
+                        const imageMarkdown = `![Uploaded image](${url})`;
+
+                        const newContent = textBefore + imageMarkdown + textAfter;
+                        setContent(newContent);
+
+                        console.log('Markdown inserted at position:', cursorPos);
+
+                        // Move cursor after the inserted markdown
+                        setTimeout(() => {
+                            textarea.focus();
+                            const newCursorPos = cursorPos + imageMarkdown.length;
+                            textarea.setSelectionRange(newCursorPos, newCursorPos);
+                        }, 0);
+                    }
+                } catch (err) {
+                    console.error('Paste error:', err);
+                    alert('Failed to process image');
+                } finally {
+                    setUploading(false);
+                }
+
+                break; // Only process the first image
             }
         }
     };
 
-    return (
-        <div className="app-main-wrapper" style={{ fontFamily: 'var(--font-mono)' }}>
-            <div className="app-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-                <Header minimal={true} />
+    // Handle paste event for IMAGE_URL field
+    const handleImageUrlPaste = async (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
 
-                <div style={{ padding: '40px', maxWidth: '1000px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-                    <div className="mono text-accent" style={{ marginBottom: '20px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
-                        // TERMINAL_EDITOR_V1.0 {id ? `[EDITING: ${id}]` : '[NEW_TRANSMISSION]'}
+        // Check if clipboard contains an image
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+
+            if (item.type.startsWith('image/')) {
+                e.preventDefault();
+                console.log('IMAGE pasted in IMAGE_URL field!');
+
+                const file = item.getAsFile();
+                if (!file) continue;
+
+                setUploadingImage(true);
+
+                try {
+                    const { url, error } = await uploadImageToSupabase(file);
+
+                    if (error) {
+                        alert('Failed to upload image: ' + error);
+                        return;
+                    }
+
+                    console.log('Image uploaded! URL:', url);
+                    setImageUrl(url);
+                } catch (err) {
+                    console.error('Image paste error:', err);
+                    alert('Failed to process image');
+                } finally {
+                    setUploadingImage(false);
+                }
+
+                break;
+            }
+        }
+    };
+
+
+    return (
+        <div className="app-main-wrapper">
+            <div className="app-layout">
+                {/* Corner Markers */}
+                <div className="corner-marker corner-top-left"></div>
+                <div className="corner-marker corner-top-right"></div>
+                <div className="corner-marker corner-bottom-left"></div>
+                <div className="corner-marker corner-bottom-right"></div>
+
+                <div className="editor-console">
+                    {/* Use Main App Header */}
+                    <Header />
+
+                    {/* Action Buttons */}
+                    <div className="editor-actions">
+                        <button
+                            className="btn-draft"
+                            onClick={handleSaveDraft}
+                            disabled={saving}
+                        >
+                            {saving ? 'SAVING...' : 'SAVE_DRAFT'}
+                        </button>
+                        <button
+                            className="btn-publish"
+                            onClick={handlePublish}
+                            disabled={saving}
+                        >
+                            {saving ? 'PUBLISHING...' : 'PUBLISH'}
+                        </button>
                     </div>
 
-                    <div style={{ display: 'grid', gap: '40px' }}>
-
-                        {/* Title Input */}
-                        <div>
-                            <label className="text-secondary" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '10px' }}>&gt; TITLE_INPUT</label>
+                    {/* Main Form */}
+                    <div className="editor-form">
+                        <div className="form-group">
+                            <label>TITLE</label>
                             <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                placeholder="ENTER_HEADLINE..."
-                                style={{
-                                    width: '100%',
-                                    background: 'transparent',
-                                    border: 'none',
-                                    borderBottom: '2px solid #333',
-                                    color: 'white',
-                                    fontSize: '2rem',
-                                    padding: '10px 0',
-                                    fontFamily: 'var(--font-main)',
-                                    fontWeight: 'bold',
-                                    outline: 'none'
-                                }}
+                                placeholder="Enter post title..."
+                                className="input-field"
                             />
                         </div>
 
-                        {/* Coordinates Input */}
-                        <div>
-                            <label className="text-secondary" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '10px' }}>&gt; GLOBAL_COORDINATES</label>
-                            <input
-                                type="text"
-                                value={coordinates}
-                                onChange={(e) => setCoordinates(e.target.value)}
-                                placeholder="e.g. 40.7° N, 74.0° W"
-                                style={{
-                                    width: '100%',
-                                    background: '#111',
-                                    border: '1px solid #333',
-                                    color: 'var(--accent-color)',
-                                    padding: '10px',
-                                    fontFamily: 'var(--font-mono)'
-                                }}
-                            />
-                        </div>
-
-                        {/* Image URL Input with Upload & Paste */}
-                        <div>
-                            <label className="text-secondary" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '10px' }}>&gt; COVER_IMAGE_URL [PASTE_SUPPORTED]</label>
-                            <div style={{ display: 'flex', gap: '10px' }}>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>SLUG</label>
                                 <input
+                                    type="text"
+                                    value={slug}
+                                    onChange={(e) => setSlug(e.target.value)}
+                                    placeholder="Auto-generated from title"
+                                    className="input-field"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>CATEGORY</label>
+                                <input
+                                    type="text"
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    placeholder="e.g. technology, design"
+                                    className="input-field"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label>CONTENT {uploading && <span style={{ color: '#00ff00' }}>(Uploading image...)</span>}</label>
+                            <textarea
+                                ref={contentTextareaRef}
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                onPaste={handlePaste}
+                                placeholder="Write your post content here... (You can paste images directly!)"
+                                className="textarea-field"
+                                rows={15}
+                            />
+                        </div>
+
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>IMAGE_URL {uploadingImage && <span style={{ color: '#00ff00' }}>(Uploading...)</span>}</label>
+                                <input
+                                    ref={imageUrlInputRef}
                                     type="text"
                                     value={imageUrl}
                                     onChange={(e) => setImageUrl(e.target.value)}
-                                    onPaste={async (e) => {
-                                        const items = e.clipboardData?.items;
-                                        if (items) {
-                                            for (let i = 0; i < items.length; i++) {
-                                                if (items[i].type.indexOf('image') !== -1) {
-                                                    e.preventDefault();
-                                                    const file = items[i].getAsFile();
-                                                    await handleImageUpload(file);
-                                                }
-                                            }
-                                        }
-                                    }}
-                                    placeholder="https://... OR PASTE IMAGE HERE"
-                                    style={{
-                                        flex: 1,
-                                        background: '#111',
-                                        border: '1px solid #333',
-                                        color: 'var(--accent-color)',
-                                        padding: '10px',
-                                        fontFamily: 'var(--font-mono)'
-                                    }}
+                                    onPaste={handleImageUrlPaste}
+                                    placeholder="Paste image or enter URL"
+                                    className="input-field"
                                 />
-                                <label style={{
-                                    cursor: 'pointer',
-                                    background: '#333',
-                                    color: 'white',
-                                    padding: '0 20px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    fontWeight: 'bold',
-                                    fontSize: '0.8rem',
-                                    whiteSpace: 'nowrap'
-                                }}>
-                                    {status === 'UPLOADING' ? '...' : 'UPLOAD_FILE'}
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            if (e.target.files?.[0]) handleImageUpload(e.target.files[0]);
-                                        }}
-                                        style={{ display: 'none' }}
-                                    />
-                                </label>
                             </div>
-                            <div className="mono text-secondary" style={{ fontSize: '0.6rem', marginTop: '5px' }}>
-                                HINT: You can copy an image (Ctrl+C) and paste it (Ctrl+V) directly into the box above.
+
+                            <div className="form-group">
+                                <label>COORDINATES</label>
+                                <input
+                                    type="text"
+                                    value={coordinates}
+                                    onChange={(e) => setCoordinates(e.target.value)}
+                                    placeholder="e.g. 0X88.2.1"
+                                    className="input-field"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>CUSTOM_TIMESTAMP <span style={{ fontSize: '0.7rem', color: '#666' }}>(optional - for display only)</span></label>
+                                <input
+                                    type="text"
+                                    value={customTimestamp}
+                                    onChange={(e) => setCustomTimestamp(e.target.value)}
+                                    placeholder="e.g. 2083.12.05 | 06:00 UTC"
+                                    className="input-field"
+                                />
                             </div>
                         </div>
 
-                        {/* Markdown Body */}
-                        <div style={{ position: 'relative' }}>
-                            <label className="text-secondary" style={{ fontSize: '0.8rem', display: 'block', marginBottom: '10px' }}>&gt; BODY_CONTENT (MARKDOWN)</label>
-                            {/* Grid Background Layer */}
-                            <div style={{
-                                position: 'absolute',
-                                top: '30px',
-                                left: 0,
-                                width: '100%',
-                                height: 'calc(100% - 30px)',
-                                zIndex: 0,
-                                opacity: 0.1,
-                                backgroundImage: 'linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)',
-                                backgroundSize: '20px 20px',
-                                pointerEvents: 'none'
-                            }}></div>
-
-                            <textarea
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                                placeholder="Begin transmission..."
-                                style={{
-                                    width: '100%',
-                                    minHeight: '400px',
-                                    background: 'transparent',
-                                    border: '1px solid #333',
-                                    color: '#ccc',
-                                    padding: '20px',
-                                    fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.9rem',
-                                    lineHeight: '1.6',
-                                    resize: 'vertical',
-                                    outline: 'none',
-                                    position: 'relative',
-                                    zIndex: 1
-                                }}
+                        <div className="form-group">
+                            <label>AUTHOR</label>
+                            <input
+                                type="text"
+                                value={author}
+                                onChange={(e) => setAuthor(e.target.value)}
+                                placeholder={currentUser?.email || 'Anonymous'}
+                                className="input-field"
                             />
                         </div>
 
-                        {/* Actions */}
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '20px', borderTop: '1px solid #333', paddingTop: '20px' }}>
-                            <div className="mono" style={{ alignSelf: 'center', color: status === 'Success' ? 'green' : (status === 'Error' ? 'red' : '#666') }}>
-                                STATUS: {status}
-                            </div>
-                            <button
-                                onClick={handlePublish}
-                                disabled={status === 'SENDING'}
-                                style={{
-                                    background: status === 'SENDING' ? '#333' : 'var(--accent-color)',
-                                    color: 'black',
-                                    padding: '15px 40px',
-                                    fontWeight: 'bold',
-                                    border: 'none',
-                                    cursor: status === 'SENDING' ? 'not-allowed' : 'pointer',
-                                    fontFamily: 'var(--font-mono)',
-                                    letterSpacing: '1px'
-                                }}>
-                                {status === 'SENDING' ? 'TRANSMITTING...' : 'INITIATE_UPLOAD'}
-                            </button>
+                        <div className="form-group checkbox-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={isPublished}
+                                    onChange={(e) => setIsPublished(e.target.checked)}
+                                />
+                                <span>PUBLISHED</span>
+                            </label>
                         </div>
 
+                        {imageUrl && (
+                            <div className="form-group">
+                                <label>IMAGE PREVIEW</label>
+                                <img
+                                    src={imageUrl}
+                                    alt="Preview"
+                                    className="preview-image"
+                                    onError={(e) => e.target.style.display = 'none'}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="editor-footer">
+                        <div className="footer-left">
+                            <span>PIXY|NEWS_EDITOR</span>
+                        </div>
+                        <div className="footer-right">
+                            <span className="status-indicator">●</span>
+                            <span>SYSTEM_ACTIVE</span>
+                        </div>
                     </div>
                 </div>
             </div>
