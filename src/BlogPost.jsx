@@ -193,25 +193,13 @@ function BlogPost() {
                     <main style={{ paddingTop: '30px', paddingLeft: '60px', paddingRight: '60px', paddingBottom: '60px', borderRight: '1px solid var(--grid-color)' }}>
 
                         {/* Article Metadata - Shows custom timestamp and parsed metadata */}
-                        {(post.custom_timestamp || metadata.status || metadata.countdown) && (
+                        {(post.custom_timestamp) && (
                             <div className="mono" style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid var(--grid-color)' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', fontSize: '0.85rem' }}>
                                     {post.custom_timestamp && (
                                         <div>
                                             <div className="text-secondary" style={{ marginBottom: '5px' }}>TIMESTAMP:</div>
                                             <div className="text-accent">{post.custom_timestamp}</div>
-                                        </div>
-                                    )}
-                                    {metadata.status && (
-                                        <div>
-                                            <div className="text-secondary" style={{ marginBottom: '5px' }}>STATUS:</div>
-                                            <div>{metadata.status}</div>
-                                        </div>
-                                    )}
-                                    {metadata.countdown && (
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <div className="text-secondary" style={{ marginBottom: '5px' }}>COUNTDOWN:</div>
-                                            <div className="text-accent" style={{ fontSize: '0.9rem' }}>{metadata.countdown}</div>
                                         </div>
                                     )}
                                 </div>
