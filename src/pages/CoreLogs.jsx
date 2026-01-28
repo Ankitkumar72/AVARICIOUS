@@ -6,7 +6,7 @@ import { useBlog } from '../context/BlogContext';
 import defaultCyborg from '../assets/ai-generated-8343518_1920.jpg';
 
 const CoreLogs = () => {
-    const { posts, loading, fetchPosts } = useBlog();
+    const { posts, loading, error, fetchPosts } = useBlog();
     const [displayLimit, setDisplayLimit] = useState(4);
 
     // Force data refresh on visit to ensure new posts appear
