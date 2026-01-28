@@ -167,10 +167,12 @@ function BlogPost() {
                                         <span>{post.author || 'UNIT_ADMIN'}</span>
                                     </div>
                                 </div>
-                                {/* <div className="meta-item">
-                                    <div className="text-secondary" style={{ marginBottom: '4px' }}>TIMESTAMP (UTC)</div>
-                                    <div>{new Date(post.updated_at).toLocaleDateString()}<br />{new Date(post.updated_at).toLocaleTimeString()}</div>
-                                </div> */}
+                                {post.custom_timestamp && (
+                                    <div className="meta-item">
+                                        <div className="text-secondary" style={{ marginBottom: '4px' }}>TIMESTAMP</div>
+                                        <div className="text-accent">{post.custom_timestamp}</div>
+                                    </div>
+                                )}
                                 <div className="meta-item">
                                     <div className="text-secondary" style={{ marginBottom: '4px' }}>COORDINATES</div>
                                     <div>{post.coordinates || 'UNKNOWN'}</div>

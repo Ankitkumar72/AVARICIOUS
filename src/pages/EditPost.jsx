@@ -92,8 +92,7 @@ const EditPost = () => {
                 coordinates,
                 author: author || currentUser?.email || 'Anonymous',
                 custom_timestamp: customTimestamp,
-                is_published: publishStatus,
-                updated_at: new Date().toISOString()
+                is_published: publishStatus
             };
 
             let result;
@@ -106,7 +105,6 @@ const EditPost = () => {
                     .select();
             } else {
                 // Create new post
-                postData.created_at = new Date().toISOString();
                 result = await supabase
                     .from('news_posts')
                     .insert([postData])
