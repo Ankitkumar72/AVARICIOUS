@@ -270,7 +270,7 @@ function Home() {
                         </section>
 
                         {/* News Grid */}
-                        <NewsGrid posts={posts} loading={loading} error={error} ref={newsGridRef} />
+                        <NewsGrid posts={filteredNews} loading={loading} error={error} ref={newsGridRef} />
 
                         {/* Subscription Section (RENAMED: JOIN THE COLLECTIVE) */}
                         <section className="subscription-section relative">
@@ -435,7 +435,7 @@ function Home() {
                                     sortedPosts.slice()
                                         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                                         .slice(transmissionOffset * TRANSMISSION_ITEMS, (transmissionOffset + 1) * TRANSMISSION_ITEMS)
-                                        .map((post, i) => (
+                                        .map((post) => (
                                             <TransmissionCard key={post.id} post={post} />
                                         ))
                                 ) : (
