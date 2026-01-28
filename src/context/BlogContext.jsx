@@ -76,43 +76,41 @@ export const BlogProvider = ({ children }) => {
             console.log("DEBUG: Fetching from news_posts table...");
 
             // Simple, direct fetch - no Promise.race, no timeouts
+            console.log("DEBUG: Attempting to fetch posts...");
             const { data, error: fetchError } = await supabase
                 .from('news_posts')
                 .select('id, title, content, author, created_at, updated_at, category, image_url, slug, custom_timestamp')
                 .order('updated_at', { ascending: false });
 
-            console.log("DEBUG: Fetch completed", {
-                success: !fetchError,
-                rowCount: data?.length || 0
-            });
+            console.log("DEBUG: Fetch result:", { data, error: fetchError });
 
             if (fetchError) {
                 console.error('Supabase Error:', fetchError);
                 setError(fetchError.message);
 
-                // Fallback to cache on error
+                // Only fallback to cache if fetch explicitly passes back an error
                 const cached = localStorage.getItem('cached_posts');
                 if (cached) {
+                    console.log("DEBUG: Serving cached posts due to error");
                     setPosts(JSON.parse(cached));
                 }
             } else if (data) {
-                console.log("DEBUG: Setting posts and caching");
+                console.log("DEBUG: Fetch successful. Posts found:", data.length);
                 setPosts(data);
+                // Update cache
                 localStorage.setItem('cached_posts', JSON.stringify(data));
+            } else {
+                console.warn("DEBUG: No data and no error?");
             }
 
         } catch (err) {
             console.error("Fetch Exception:", err);
             setError(err.message || 'Network Error');
-
-            // Fallback to cache on exception
+            // Cache fallback
             const cached = localStorage.getItem('cached_posts');
-            if (cached) {
-                setPosts(JSON.parse(cached));
-            }
+            if (cached) setPosts(JSON.parse(cached));
         } finally {
             clearTimeout(timeoutId);
-            console.log("DEBUG: Setting loading to false");
             setLoading(false);
         }
     };

@@ -47,7 +47,12 @@ const CoreLogs = () => {
 
                 {/* List Container */}
                 <div className="archive-list-container flex-1">
-                    {posts.length > 0 ? (
+                    {error ? (
+                        <div className="p-20 text-center mono text-red-500">
+                            <div>SYSTEM_CRITICAL_ERROR</div>
+                            <div className="text-xs mt-2 text-secondary">{error}</div>
+                        </div>
+                    ) : posts.length > 0 ? (
                         postItems(posts, displayLimit)
                     ) : (
                         <div className="p-20 text-center mono text-secondary">ARCHIVES_EMPTY</div>
