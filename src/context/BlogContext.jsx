@@ -78,7 +78,7 @@ export const BlogProvider = ({ children }) => {
             // Simple, direct fetch - no Promise.race, no timeouts
             const { data, error: fetchError } = await supabase
                 .from('news_posts')
-                .select('id, title, content, author, created_at, category, image_url, slug')
+                .select('id, title, content, author, created_at, updated_at, category, image_url, slug, custom_timestamp')
                 .order('updated_at', { ascending: false });
 
             console.log("DEBUG: Fetch completed", {
