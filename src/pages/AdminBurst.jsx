@@ -24,6 +24,27 @@ Nodes must re-initialize connection by 24:00.
 
     const [recipientCount, setRecipientCount] = useState(4209);
     const [status, setStatus] = useState('IDLE');
+    const [activeTab, setActiveTab] = useState('BURST'); // BURST, ORACLE, LOGS
+    const [emailLogs, setEmailLogs] = useState([]);
+
+    // Fetch Logs
+    useEffect(() => {
+        if (activeTab === 'LOGS') {
+            const fetchLogs = async () => {
+                const { data, error } = await supabase
+                    .from('email_logs')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (!error) setEmailLogs(data || []);
+            };
+            fetchLogs();
+            const interval = setInterval(fetchLogs, 10000); // 10s Poll
+            return () => clearInterval(interval);
+        }
+    }, [activeTab]);
+
     const navigate = useNavigate();
 
     // Check Auth
