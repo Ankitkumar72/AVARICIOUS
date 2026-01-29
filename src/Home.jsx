@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import './index.css' // Global styles
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import Header from './Header'
 import cyborgFeedImg from './assets/ai-generated-8343518_1920.jpg';
 import defaultAuthorImg from './assets/8machine-_-Jw7p2A369As-unsplash.jpg';
@@ -47,6 +47,7 @@ const HackingOverlay = () => (
 );
 
 function Home() {
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('q') || '';
     const newsGridRef = useRef(null);
@@ -70,6 +71,7 @@ function Home() {
         latencyPref: 'ULTRA_LOW',
         email: ''
     });
+    const [duplicateError, setDuplicateError] = useState(false);
 
     // Dynamic Latency Jitter
     const [latency, setLatency] = useState(14);
@@ -104,13 +106,16 @@ function Home() {
 
                 if (error) {
                     if (error.code === '23505') { // Unique violation
-                        alert("SIGNAL_COLLISION: EMAIL_ALREADY_REGISTERED");
+                        setDuplicateError(true);
                     } else {
                         throw error;
                     }
                     setJoinState('IDLE');
                 } else {
                     setJoinState('JOINED');
+                    setTimeout(() => {
+                        navigate('/welcome');
+                    }, 1000);
                 }
             } catch (err) {
                 console.error("UPLINK_FAILED:", err);
@@ -278,7 +283,10 @@ function Home() {
                                         placeholder="ENTER_ID_KEY"
                                         className="flex-1 bg-transparent border border-[#333] p-4 text-secondary font-mono outline-none focus:border-[#00f0ff] text-sm placeholder:text-secondary/50"
                                         value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, email: e.target.value });
+                                            setDuplicateError(false);
+                                        }}
                                         onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
                                     />
 
@@ -290,6 +298,13 @@ function Home() {
                                     >
                                         {joinState === 'HACKING' ? 'CONNECTING...' : 'CONNECT'}
                                     </button>
+                                </div>
+                            )}
+
+                            {/* Duplicate Error Message */}
+                            {duplicateError && (
+                                <div className="text-red-500 font-mono text-sm mt-4 animate-pulse">
+                                    ⚠ ID ALREADY IN THE COLLECTIVE
                                 </div>
                             )}
 

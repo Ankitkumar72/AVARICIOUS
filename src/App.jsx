@@ -19,6 +19,7 @@ const EnforcementBypass = lazy(() => import('./pages/EnforcementBypass'));
 const SystemIntegrity = lazy(() => import('./pages/SystemIntegrity'));
 const AdminBurst = lazy(() => import('./pages/AdminBurst'));
 const Diagnostics = lazy(() => import('./pages/Diagnostics'));
+const Welcome = lazy(() => import('./pages/Welcome'));
 
 // Loading Fallback Component
 const LoadingScreen = () => (
@@ -146,6 +147,14 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<LoadingScreen />}>
         <AdminBurst />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/welcome",
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <Welcome />
       </Suspense>
     ),
   },
