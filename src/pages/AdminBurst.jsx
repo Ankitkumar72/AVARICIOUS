@@ -37,11 +37,21 @@ Nodes must re-initialize connection by 24:00.
         checkSession();
     }, [navigate]);
 
-    // Simulate "Live DB Sync" for recipient count
+    // Live DB Sync for recipient count
     useEffect(() => {
-        const interval = setInterval(() => {
-            setRecipientCount(prev => prev + Math.floor(Math.random() * 3));
-        }, 5000);
+        const fetchCount = async () => {
+            const { count, error } = await supabase
+                .from('collective_members')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'ACTIVE');
+
+            if (!error && count !== null) {
+                setRecipientCount(count);
+            }
+        };
+
+        fetchCount();
+        const interval = setInterval(fetchCount, 30000); // Refresh every 30s
         return () => clearInterval(interval);
     }, []);
 
@@ -51,11 +61,37 @@ Nodes must re-initialize connection by 24:00.
 
     const handleBroadcast = async () => {
         setStatus('SENDING');
-        // Simulate network request
-        setTimeout(() => {
-            setStatus('SUCCESS');
-            setTimeout(() => setStatus('IDLE'), 2000);
-        }, 1500);
+        try {
+            const response = await fetch('/api/burst', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    subject: formData.subject_id,
+                    content: formData.content,
+                    node_origin: formData.node_origin,
+                    latency_pref: formData.latency_pref
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setStatus('SUCCESS');
+                console.log("Broadcast Result:", data);
+                // Optionally show success stats
+                // alert(`Sent to ${data.count} nodes.`); 
+                setTimeout(() => setStatus('IDLE'), 3000);
+            } else {
+                console.error("Broadcast Failed:", data.error);
+                setStatus('ERROR');
+                alert(`ERROR: ${data.error}`);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+            setStatus('ERROR');
+        }
     };
 
     return (
