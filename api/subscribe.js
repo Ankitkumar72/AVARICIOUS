@@ -28,15 +28,15 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 1. Save to Database
-        const { error: dbError } = await supabase
-            .from('subscribers')
-            .insert([{ email, status: 'active' }]);
+        // [MODIFIED] 1. Skip DB Insert (Handled by Home.jsx in 'collective_members')
+        // const { error: dbError } = await supabase
+        //     .from('subscribers')
+        //     .insert([{ email, status: 'active' }]);
 
-        // Ignore unique constraint error (user already subscribed), just proceed to send emails
-        if (dbError && dbError.code !== '23505') {
-            throw dbError;
-        }
+        // // Ignore unique constraint error
+        // if (dbError && dbError.code !== '23505') {
+        //     throw dbError;
+        // }
 
         // 2. Send Welcome Email (Immediate)
         await transporter.sendMail({
