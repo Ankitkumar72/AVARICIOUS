@@ -98,7 +98,7 @@ function BlogPost() {
         const timer = setTimeout(() => {
             const tables = document.querySelectorAll('.markdown-content table');
             tables.forEach(table => {
-                const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText);
+                const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
                 const rows = table.querySelectorAll('tbody tr');
                 rows.forEach(row => {
                     const cells = row.querySelectorAll('td');

@@ -202,13 +202,13 @@ const Header = () => {
                 </div>
 
                 <div className="mono" style={{ padding: '40px 20px', display: 'flex', flexDirection: 'column', gap: '30px', fontSize: '1.2rem' }}>
-                    <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0s' }}>01_HOME</Link>
-                    <Link to="/core-logs" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.1s' }}>02_CORE_LOGS</Link>
-                    <Link to="/neural-synapse" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.2s' }}>03_NEURAL_SYNAPSE</Link>
-                    <Link to="/join-network" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.3s' }}>04_JOIN_NETWORK</Link>
-                    <Link to="/enforcement-bypass" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.4s' }}>05_ENFORCEMENT_BYPASS</Link>
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease 0s forwards` : 'none', opacity: 0 }}>01_HOME</Link>
+                    <Link to="/core-logs" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease 0.1s forwards` : 'none', opacity: 0 }}>02_CORE_LOGS</Link>
+                    <Link to="/neural-synapse" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease 0.2s forwards` : 'none', opacity: 0 }}>03_NEURAL_SYNAPSE</Link>
+                    <Link to="/join-network" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease 0.3s forwards` : 'none', opacity: 0 }}>04_JOIN_NETWORK</Link>
+                    <Link to="/enforcement-bypass" onClick={() => setMobileMenuOpen(false)} style={{ color: 'white', textDecoration: 'none', animation: isMobileMenuOpen ? `disintegration 0.5s ease 0.4s forwards` : 'none', opacity: 0 }}>05_ENFORCEMENT_BYPASS</Link>
 
-                    <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #333', animation: isMobileMenuOpen ? `disintegration 0.5s ease forwards` : 'none', opacity: 0, animationDelay: '0.4s' }}>
+                    <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #333', animation: isMobileMenuOpen ? `disintegration 0.5s ease 0.4s forwards` : 'none', opacity: 0 }}>
                         <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <span style={{ color: '#666' }}>[?]</span>
                             <input
