@@ -112,6 +112,13 @@ function Home() {
                     }
                     setJoinState('IDLE');
                 } else {
+                    // TRIGGER EMAIL Send
+                    await fetch('/api/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: formData.email })
+                    });
+
                     setJoinState('JOINED');
                     setTimeout(() => {
                         navigate('/welcome');

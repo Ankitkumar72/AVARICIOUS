@@ -92,9 +92,27 @@ export default async function handler(req, res) {
                     subject: `// DIGEST: ${posts.length} New System Logs`,
                     html: emailHtml
                 });
+
+                // Log Success
+                await supabase.from('email_logs').insert([{
+                    recipient: recipient.email,
+                    subject: `// DIGEST: ${posts.length} New System Logs`,
+                    status: 'SENT',
+                    trigger_source: 'DIGEST'
+                }]);
+
                 sentCount++;
             } catch (err) {
                 console.error(`Failed to send digest to ${recipient.email}:`, err);
+
+                // Log Failure
+                await supabase.from('email_logs').insert([{
+                    recipient: recipient.email,
+                    subject: `// DIGEST: ${posts.length} New System Logs`,
+                    status: 'FAILED',
+                    error: err.message,
+                    trigger_source: 'DIGEST'
+                }]);
             }
         }
 

@@ -107,10 +107,16 @@ Nodes must re-initialize connection by 24:00.
 
                     {/* Tabs */}
                     <div className="flex h-full">
-                        <div className="h-full flex items-center px-6 text-[#888] text-xs font-bold border-r border-[#D4D4D4] bg-[#EAEAEA] hover:bg-white cursor-pointer transition-colors">
+                        <div
+                            onClick={() => setActiveTab('LOGS')}
+                            className={`h-full flex items-center px-6 text-xs font-bold border-r border-[#D4D4D4] hover:bg-white cursor-pointer transition-colors ${activeTab === 'LOGS' ? 'bg-white text-black' : 'bg-[#EAEAEA] text-[#888]'}`}
+                        >
                             CORE_LOGS
                         </div>
-                        <div className="h-full flex items-center px-6 text-[#888] text-xs font-bold border-r border-[#D4D4D4] bg-[#EAEAEA] hover:bg-white cursor-pointer transition-colors">
+                        <div
+                            onClick={() => setActiveTab('BURST')}
+                            className={`h-full flex items-center px-6 text-xs font-bold border-r border-[#D4D4D4] hover:bg-white cursor-pointer transition-colors ${activeTab === 'BURST' ? 'bg-white text-black' : 'bg-[#EAEAEA] text-[#888]'}`}
+                        >
                             NEURAL_SYNAPSE
                         </div>
                         <div className="h-full flex items-center px-6 text-white text-xs font-bold bg-black border-r border-black cursor-default">
@@ -135,50 +141,101 @@ Nodes must re-initialize connection by 24:00.
                 }}></div>
 
                 {/* Left Editor Area */}
-                <div className="flex-1 p-12 relative z-10 flex flex-col">
-                    <div className="mb-8">
-                        <div className="text-[10px] text-[#888] tracking-[2px] mb-2 font-bold">SYSTEM PROTOCOL // 0X442</div>
-                        <h1 className="text-5xl font-black uppercase tracking-tight leading-[0.9]">
-                            TRANSMISSION<br />PAYLOAD
-                        </h1>
-                    </div>
-
-                    <div className="flex-1 bg-white border border-[#DDD] shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative flex flex-col overflow-hidden">
-                        {/* Buffer Cap Label */}
-                        <div className="absolute top-0 right-0 p-4 border-l border-b border-[#EEE] bg-[#FAFAFA] text-right">
-                            <div className="text-[9px] text-[#888] font-bold tracking-widest">BUFFER_CAP</div>
-                            <div className="text-xl font-bold">128kb</div>
+                {/* Left Editor Area (Conditionally Rendered) */}
+                {activeTab === 'LOGS' ? (
+                    <div className="flex-1 p-12 relative z-10 flex flex-col h-full overflow-hidden">
+                        <div className="mb-8 flex justify-between items-end">
+                            <div>
+                                <div className="text-[10px] text-[#888] tracking-[2px] mb-2 font-bold">SYSTEM_LOGS // 0X552</div>
+                                <h1 className="text-5xl font-black uppercase tracking-tight leading-[0.9]">
+                                    COMMUNICATION<br />ARCHIVE
+                                </h1>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-[10px] bg-black text-white px-3 py-1 font-bold mb-2 inline-block">LIVE_FEED</div>
+                            </div>
                         </div>
 
-                        {/* Editor Content */}
-                        <div className="flex flex-1 p-8 font-mono text-sm leading-relaxed overflow-auto">
-                            {/* Line Numbers */}
-                            <div className="flex flex-col text-right pr-6 mr-6 border-r border-[#EEE] text-[#CCC] select-none font-bold">
-                                {Array.from({ length: 25 }, (_, i) => (
-                                    <div key={i} className="leading-relaxed">{i + 1}</div>
+                        <div className="flex-1 bg-white border border-[#DDD] shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative flex flex-col overflow-hidden">
+                            {/* Logs Table Header */}
+                            <div className="grid grid-cols-12 gap-4 p-4 border-b border-[#EEE] bg-[#FAFAFA] text-[10px] font-bold text-[#888] tracking-wider uppercase">
+                                <div className="col-span-2">TIMESTAMP</div>
+                                <div className="col-span-1">STATUS</div>
+                                <div className="col-span-2">TRIGGER</div>
+                                <div className="col-span-3">RECIPIENT</div>
+                                <div className="col-span-4">SUBJECT / ERROR</div>
+                            </div>
+
+                            {/* Logs Scrollable Area */}
+                            <div className="flex-1 overflow-auto p-0">
+                                {emailLogs.map((log) => (
+                                    <div key={log.id} className="grid grid-cols-12 gap-4 p-4 border-b border-[#F0F0F0] text-xs hover:bg-[#F9F9F9] transition-colors font-mono">
+                                        <div className="col-span-2 text-[#666]">{new Date(log.created_at).toLocaleTimeString()}</div>
+                                        <div className="col-span-1">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${log.status === 'SENT' ? 'bg-[#00D655]/10 text-[#00D655]' : 'bg-red-500/10 text-red-500'
+                                                }`}>
+                                                {log.status}
+                                            </span>
+                                        </div>
+                                        <div className="col-span-2 text-[#444] font-bold">{log.trigger_source}</div>
+                                        <div className="col-span-3 text-[#666] truncate">{log.recipient}</div>
+                                        <div className="col-span-4 text-[#333] truncate" title={log.error || log.subject}>
+                                            {log.status === 'FAILED' ? <span className="text-red-500 font-bold">ERR: {log.error}</span> : log.subject}
+                                        </div>
+                                    </div>
                                 ))}
+                                {emailLogs.length === 0 && (
+                                    <div className="p-12 text-center text-[#888] italic">NO_LOGS_FOUND_IN_ARCHIVE</div>
+                                )}
                             </div>
-
-                            {/* Text Area */}
-                            <textarea
-                                name="content"
-                                value={formData.content}
-                                onChange={handleChange}
-                                className="flex-1 resize-none outline-none border-none bg-transparent font-mono text-[#333] leading-relaxed"
-                                spellCheck="false"
-                            />
-                        </div>
-
-                        {/* Editor Footer */}
-                        <div className="h-8 border-t border-[#EEE] bg-[#FAFAFA] flex items-center justify-between px-4 text-[9px] font-bold text-[#888] tracking-wider uppercase">
-                            <div className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#00D655]"></span>
-                                SYNTAX: HTML5_COMPLIANT
-                            </div>
-                            <div>AUTO_SAVE: ENABLED [14:02:22]</div>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="flex-1 p-12 relative z-10 flex flex-col">
+                        <div className="mb-8">
+                            <div className="text-[10px] text-[#888] tracking-[2px] mb-2 font-bold">SYSTEM PROTOCOL // 0X442</div>
+                            <h1 className="text-5xl font-black uppercase tracking-tight leading-[0.9]">
+                                TRANSMISSION<br />PAYLOAD
+                            </h1>
+                        </div>
+
+                        <div className="flex-1 bg-white border border-[#DDD] shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative flex flex-col overflow-hidden">
+                            {/* Buffer Cap Label */}
+                            <div className="absolute top-0 right-0 p-4 border-l border-b border-[#EEE] bg-[#FAFAFA] text-right">
+                                <div className="text-[9px] text-[#888] font-bold tracking-widest">BUFFER_CAP</div>
+                                <div className="text-xl font-bold">128kb</div>
+                            </div>
+
+                            {/* Editor Content */}
+                            <div className="flex flex-1 p-8 font-mono text-sm leading-relaxed overflow-auto">
+                                {/* Line Numbers */}
+                                <div className="flex flex-col text-right pr-6 mr-6 border-r border-[#EEE] text-[#CCC] select-none font-bold">
+                                    {Array.from({ length: 25 }, (_, i) => (
+                                        <div key={i} className="leading-relaxed">{i + 1}</div>
+                                    ))}
+                                </div>
+
+                                {/* Text Area */}
+                                <textarea
+                                    name="content"
+                                    value={formData.content}
+                                    onChange={handleChange}
+                                    className="flex-1 resize-none outline-none border-none bg-transparent font-mono text-[#333] leading-relaxed"
+                                    spellCheck="false"
+                                />
+                            </div>
+
+                            {/* Editor Footer */}
+                            <div className="h-8 border-t border-[#EEE] bg-[#FAFAFA] flex items-center justify-between px-4 text-[9px] font-bold text-[#888] tracking-wider uppercase">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#00D655]"></span>
+                                    SYNTAX: HTML5_COMPLIANT
+                                </div>
+                                <div>AUTO_SAVE: ENABLED [14:02:22]</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Right Configuration Sidebar */}
                 <div className="w-[450px] bg-[#F5F5F5] border-l border-[#DDD] p-10 relative z-10 flex flex-col h-full overflow-y-auto">

@@ -75,9 +75,28 @@ export default async function handler(req, res) {
                         </div>
                     `
                 });
+
+                // Log Success
+                await supabase.from('email_logs').insert([{
+                    recipient: recipient.email,
+                    subject: subject,
+                    status: 'SENT',
+                    trigger_source: 'BURST'
+                }]);
+
                 sentCount++;
             } catch (err) {
                 console.error(`Failed to send to ${recipient.email}:`, err);
+
+                // Log Failure
+                await supabase.from('email_logs').insert([{
+                    recipient: recipient.email,
+                    subject: subject,
+                    status: 'FAILED',
+                    error: err.message,
+                    trigger_source: 'BURST'
+                }]);
+
                 failedEmails.push(recipient.email);
             }
         }
