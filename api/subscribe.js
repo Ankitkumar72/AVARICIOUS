@@ -46,9 +46,7 @@ export default async function handler(req, res) {
             html: `
                 <div style="background: #000; color: #ccc; font-family: monospace; padding: 40px; line-height: 1.6;">
                     
-                    <h2 style="color: #fff; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 30px;">
-                        [SUBJECT: SIGNAL_ESTABLISHED // CONNECTION_SECURED]
-                    </h2>
+                <div style="background: #000; color: #ccc; font-family: monospace; padding: 40px; line-height: 1.6;">
 
                     <p><strong>FROM:</strong> Elias-7 [Sector_7_Node]<br>
                     <strong>TO:</strong> Biological_Asset_[ID_PENDING]<br>
@@ -96,48 +94,6 @@ export default async function handler(req, res) {
             status: 'SENT',
             trigger_source: 'WELCOME'
         }]);
-
-        // 3. Wait 2 Seconds (Simulating processing)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // 4. Fetch Latest Logs (Optional Second Email)
-        const { data: logs } = await supabase
-            .from('news_posts')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(3);
-
-        if (logs && logs.length > 0) {
-            const logContent = logs.map(log => `
-                <h3>[LOG ${log.id}]: ${log.title}</h3>
-                <p>${log.content ? log.content.substring(0, 300) : ''}...</p>
-                <a href="https://pixy-news.vercel.app/blog/${log.id}">READ_FULL_TRANSMISSION</a>
-                <hr>
-            `).join('');
-
-            // 5. Send Follow-up "Logs" Email
-            await transporter.sendMail({
-                from: `"Pixy System" <${process.env.GMAIL_USER}>`,
-                to: email,
-                subject: "INCOMING_TRANSMISSION: Latest System Logs",
-                html: `
-                    <div style="background: #000; color: #00f0ff; font-family: monospace; padding: 20px;">
-                        <h2>// DATA_STREAM_RECEIVED</h2>
-                        <p>Downloading latest sector reports...</p>
-                        ${logContent}
-                        <p>[END_OF_TRANSMISSION]</p>
-                    </div>
-                `
-            });
-
-            // Log Second Success
-            await supabase.from('email_logs').insert([{
-                recipient: email,
-                subject: "INCOMING_TRANSMISSION: Latest System Logs",
-                status: 'SENT',
-                trigger_source: 'WELCOME_FOLLOWUP'
-            }]);
-        }
 
         return res.status(200).json({ success: true });
 
