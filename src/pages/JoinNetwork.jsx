@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useBlog } from '../context/BlogContext';
 import Header from '../Header';
 import archwayImg from '../assets/archway.png';
 import '../index.css';
@@ -11,8 +13,29 @@ const JoinNetwork = () => {
         latencyPref: 'ULTRA_LOW'
     });
 
+    const { login } = useBlog();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleLogin = async (e) => {
+        if (e) e.preventDefault(); // Prevent form submit if wrapped
+        console.log("INITIALIZE_CONNECTION CLICKED");
+        setLoading(true);
+        try {
+            console.log("Attempting login with:", formData.identityHash);
+            await login(formData.identityHash, formData.accessKey);
+            console.log("Login success, redirecting...");
+            navigate('/admin/uplink');
+        } catch (error) {
+            console.error("Login Error:", error);
+            alert(`ACCESS_DENIED: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -101,135 +124,146 @@ const JoinNetwork = () => {
                     }}>
                         <div style={{ maxWidth: '400px', width: '100%' }}>
 
-                            {/* Form Field: IDENTITY_HASH */}
-                            <div style={{ marginBottom: '40px' }}>
-                                <label className="mono" style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '10px', letterSpacing: '1px' }}>
-                                    IDENTITY_HASH
-                                </label>
-                                <input
-                                    type="text"
-                                    name="identityHash"
-                                    placeholder="USER_NAME_ALPHA"
-                                    value={formData.identityHash}
-                                    onChange={handleChange}
-                                    style={{
-                                        width: '100%',
-                                        background: 'transparent',
-                                        border: '1px solid #333',
-                                        padding: '15px',
-                                        color: 'white',
-                                        fontFamily: 'monospace',
-                                        fontSize: '1rem',
-                                        outline: 'none'
-                                    }}
-                                />
-                            </div>
-
-                            {/* Form Field: ACCESS_KEY */}
-                            <div style={{ marginBottom: '40px' }}>
-                                <label className="mono" style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '10px', letterSpacing: '1px' }}>
-                                    ACCESS_KEY
-                                </label>
-                                <input
-                                    type="password"
-                                    name="accessKey"
-                                    placeholder="............"
-                                    value={formData.accessKey}
-                                    onChange={handleChange}
-                                    style={{
-                                        width: '100%',
-                                        background: 'transparent',
-                                        border: '1px solid #333',
-                                        padding: '15px',
-                                        color: 'white',
-                                        fontFamily: 'monospace',
-                                        fontSize: '1rem',
-                                        outline: 'none'
-                                    }}
-                                />
-                            </div>
-
-                            {/* Flex Row for Dropdowns */}
-                            <div style={{ display: 'flex', gap: '20px', marginBottom: '60px' }}>
-                                <div style={{ flex: 1 }}>
+                            <form onSubmit={handleLogin}>
+                                {/* Form Field: IDENTITY_HASH */}
+                                <div style={{ marginBottom: '40px' }}>
                                     <label className="mono" style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '10px', letterSpacing: '1px' }}>
-                                        NODE_ORIGIN
+                                        IDENTITY_HASH
                                     </label>
-                                    <div style={{ position: 'relative' }}>
-                                        <select
-                                            name="nodeOrigin"
-                                            value={formData.nodeOrigin}
-                                            onChange={handleChange}
-                                            style={{
-                                                width: '100%',
-                                                background: 'transparent',
-                                                border: '1px solid #333',
-                                                padding: '15px',
-                                                color: 'white',
-                                                fontFamily: 'monospace',
-                                                fontSize: '0.9rem',
-                                                outline: 'none',
-                                                appearance: 'none',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            <option value="SECTOR_07" style={{ color: 'black' }}>SECTOR_07</option>
-                                            <option value="SECTOR_09" style={{ color: 'black' }}>SECTOR_09</option>
-                                            <option value="PROXY_NODE" style={{ color: 'black' }}>PROXY_NODE</option>
-                                        </select>
-                                        <div style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#666', fontSize: '0.7rem' }}>▼</div>
+                                    <input
+                                        type="text"
+                                        name="identityHash"
+                                        placeholder="USER_NAME_ALPHA"
+                                        value={formData.identityHash}
+                                        onChange={handleChange}
+                                        autoComplete="email"
+                                        style={{
+                                            width: '100%',
+                                            background: 'transparent',
+                                            border: '1px solid #333',
+                                            padding: '15px',
+                                            color: 'white',
+                                            fontFamily: 'monospace',
+                                            fontSize: '1rem',
+                                            outline: 'none'
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Form Field: ACCESS_KEY */}
+                                <div style={{ marginBottom: '40px' }}>
+                                    <label className="mono" style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '10px', letterSpacing: '1px' }}>
+                                        ACCESS_KEY
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="accessKey"
+                                        placeholder="............"
+                                        value={formData.accessKey}
+                                        onChange={handleChange}
+                                        autoComplete="current-password"
+                                        style={{
+                                            width: '100%',
+                                            background: 'transparent',
+                                            border: '1px solid #333',
+                                            padding: '15px',
+                                            color: 'white',
+                                            fontFamily: 'monospace',
+                                            fontSize: '1rem',
+                                            outline: 'none'
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Flex Row for Dropdowns */}
+                                <div style={{ display: 'flex', gap: '20px', marginBottom: '60px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label className="mono" style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '10px', letterSpacing: '1px' }}>
+                                            NODE_ORIGIN
+                                        </label>
+                                        <div style={{ position: 'relative' }}>
+                                            <select
+                                                name="nodeOrigin"
+                                                value={formData.nodeOrigin}
+                                                onChange={handleChange}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'transparent',
+                                                    border: '1px solid #333',
+                                                    padding: '15px',
+                                                    color: 'white',
+                                                    fontFamily: 'monospace',
+                                                    fontSize: '0.9rem',
+                                                    outline: 'none',
+                                                    appearance: 'none',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <option value="SECTOR_07" style={{ color: 'black' }}>SECTOR_07</option>
+                                                <option value="SECTOR_09" style={{ color: 'black' }}>SECTOR_09</option>
+                                                <option value="PROXY_NODE" style={{ color: 'black' }}>PROXY_NODE</option>
+                                            </select>
+                                            <div style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#666', fontSize: '0.7rem' }}>▼</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label className="mono" style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '10px', letterSpacing: '1px' }}>
+                                            LATENCY_PREF
+                                        </label>
+                                        <div style={{ position: 'relative' }}>
+                                            <select
+                                                name="latencyPref"
+                                                value={formData.latencyPref}
+                                                onChange={handleChange}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'transparent',
+                                                    border: '1px solid #333',
+                                                    padding: '15px',
+                                                    color: 'white',
+                                                    fontFamily: 'monospace',
+                                                    fontSize: '0.9rem',
+                                                    outline: 'none',
+                                                    appearance: 'none',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <option value="ULTRA_LOW" style={{ color: 'black' }}>ULTRA_LOW</option>
+                                                <option value="BALANCED" style={{ color: 'black' }}>BALANCED</option>
+                                                <option value="SECURE" style={{ color: 'black' }}>SECURE</option>
+                                            </select>
+                                            <div style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#666', fontSize: '0.7rem' }}>▼</div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                    <label className="mono" style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '10px', letterSpacing: '1px' }}>
-                                        LATENCY_PREF
-                                    </label>
-                                    <div style={{ position: 'relative' }}>
-                                        <select
-                                            name="latencyPref"
-                                            value={formData.latencyPref}
-                                            onChange={handleChange} // Corrected handler name
-                                            style={{
-                                                width: '100%',
-                                                background: 'transparent',
-                                                border: '1px solid #333',
-                                                padding: '15px',
-                                                color: 'white',
-                                                fontFamily: 'monospace',
-                                                fontSize: '0.9rem',
-                                                outline: 'none',
-                                                appearance: 'none',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            <option value="ULTRA_LOW" style={{ color: 'black' }}>ULTRA_LOW</option>
-                                            <option value="BALANCED" style={{ color: 'black' }}>BALANCED</option>
-                                            <option value="SECURE" style={{ color: 'black' }}>SECURE</option>
-                                        </select>
-                                        <div style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#666', fontSize: '0.7rem' }}>▼</div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Action Button */}
-                            <button style={{
-                                width: '100%',
-                                background: 'white',
-                                color: 'black',
-                                border: 'none',
-                                padding: '20px',
-                                fontFamily: 'monospace',
-                                fontWeight: 'bold',
-                                fontSize: '1rem',
-                                letterSpacing: '2px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <span>INITIALIZE_CONNECTION</span>
-                                <span>→</span>
-                            </button>
+                                {/* Action Button */}
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="hover:bg-gray-200 transition-colors"
+                                    style={{
+                                        width: '100%',
+                                        background: 'white',
+                                        color: 'black',
+                                        border: 'none',
+                                        padding: '20px',
+                                        fontFamily: 'monospace',
+                                        fontWeight: 'bold',
+                                        fontSize: '1rem',
+                                        letterSpacing: '2px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        opacity: loading ? 0.7 : 1,
+                                        position: 'relative',
+                                        zIndex: 50
+                                    }}>
+                                    <span>{loading ? 'AUTHENTICATING...' : 'INITIALIZE_CONNECTION'}</span>
+                                    <span>→</span>
+                                </button>
+                            </form>
 
                             {/* Status Footer INSIDE Right Panel */}
                             <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', color: '#444' }} className="mono">
@@ -258,6 +292,7 @@ const JoinNetwork = () => {
                         <span>ENCRYPTION: AES-256</span>
                         <span>SIGNAL: STABLE</span>
                         <span>LATENCY: 14MS</span>
+                        <Link to="/admin/uplink" style={{ color: '#222', textDecoration: 'none', cursor: 'default' }}>●</Link>
                     </div>
                 </div>
 
