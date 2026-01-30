@@ -3,6 +3,11 @@
 ## 1. Directory Structure
 
 ```graphql
+api/                        # Vercel Serverless Functions (Backend)
+├── burst.js                # Manual email broadcast ("Burst") handler
+├── cron-digest.js          # Automated weekly digest (Cron Job)
+└── subscribe.js            # New subscriber handler (Welcome Email)
+
 src/
 ├── assets/                 # Static assets (images, icons)
 ├── components/             # Reusable UI components
@@ -19,14 +24,18 @@ src/
 │   └── ...                 # Static data files (if any)
 ├── pages/                  # Route-specific page components
 │   ├── About.jsx           # "About" page
+│   ├── AdminBurst.jsx      # [NEW] Admin console for sending mass emails
 │   ├── Archive.jsx         # Full list of historical posts
 │   ├── BlogPost.jsx        # Individual blog post view (/blog/:id)
-│   ├── CoreLogs.jsx        # System logs view
+│   ├── CoreLogs.jsx        # [NEW] Raw system logs view
 │   ├── Diagnostics.jsx     # System diagnostics utility
 │   ├── EditPost.jsx        # CMS Interface for creating/editing posts
+│   ├── EnforcementBypass.jsx # [NEW] Hacker minigame / interactive page
+│   ├── JoinNetwork.jsx     # [NEW] Email subscription landing page
 │   ├── Login.jsx           # Authentication page
-│   ├── NeuralSynapse.jsx   # Interactive visual page
-│   └── ...                 # Other auxiliary pages
+│   ├── NeuralSynapse.jsx   # [NEW] Interactive visual page (Three.js/Canvas like)
+│   ├── SystemIntegrity.jsx # [NEW] System health dashboard
+│   └── Welcome.jsx         # [NEW] Post-signup landing page
 ├── App.jsx                 # Main Application Component & Routing
 ├── main.jsx                # React Entry Point
 ├── supabaseClient.js       # Supabase Client Configuration
@@ -48,7 +57,8 @@ graph TD
     Router --> Home
     Router --> BlogPost
     Router --> Archive
-    Router --> AdminPages[Admin/Edit Pages]
+    Router --> CoreLogs
+    Router --> AdminPages[Admin/Edit/Burst Pages]
     
     Home --> BootSequence
     Home --> Header
@@ -68,7 +78,7 @@ graph TD
 #### 1. Routing System (`App.jsx`)
 - Uses `createBrowserRouter` from `react-router-dom`.
 - Implements **Code Splitting** via `React.lazy()` and `Suspense` for performance.
-- Each route (e.g., `/`, `/blog/:id`) is lazy-loaded to reduce initial bundle size.
+- Each route (e.g., `/`, `/blog/:id`, `/admin/uplink`) is lazy-loaded.
 
 #### 2. State Management (`BlogContext.jsx`)
 - **Purpose**: Centralized state for the application.
@@ -79,14 +89,22 @@ graph TD
 - **Pattern**: Uses React Context API. Wraps the entire app in `App.jsx`.
 - **Caching**: Implements `localStorage` caching (`cached_posts`) for instant "offline-first" feel.
 
-#### 3. Data Layer (`supabaseClient.js`)
+#### 3. Communication System (`/api/*`)
+- **Purpose**: Email delivery and automation.
+- **Components**:
+    - `subscribe.js`: Adds user to `subscribers` table + sends Welcome Email.
+    - `burst.js`: Protected endpoint for Admin to blast emails to all active subscribers.
+    - `cron-digest.js`: Triggered by Vercel Cron (Wed/Sun 10am UTC) to compile and send "Weekly Digest".
+- **Service**: Nodemailer (Gmail SMTP).
+
+#### 4. Data Layer (`supabaseClient.js`)
 - **Service**: Supabase (PostgreSQL + Auth).
 - **Environment**: Configured via `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 - **Usage**:
     - `BlogContext` fetches all posts on mount.
     - `Home` and other pages can subscribe to real-time changes (if implemented).
 
-#### 4. Styling System
+#### 5. Styling System
 - **Core**: Tailwind CSS (utility classes).
 - **Custom**: Heavy use of custom CSS files (e.g., `neural-synapse.css`) for the "Cyberpunk" aesthetic.
 - **Effects**:
@@ -95,26 +113,31 @@ graph TD
 
 ## 3. Data Flow
 
-1.  **Initialization**:
+1.  **Frontend Initialization**:
     - App starts. `BlogProvider` initializes.
-    - Checks `localStorage` for cached posts (immediate display).
-    - Checks Supabase Auth session for user login.
+    - Checks `localStorage` for cached posts.
+    - Checks Supabase Auth session.
 
-2.  **Fetching**:
+2.  **Content Fetching**:
     - `useEffect` in `BlogContext` calls `fetchPosts()`.
     - Queries `news_posts` table in Supabase.
-    - Updates `posts` state and refreshes `localStorage` cache.
 
-3.  **Display**:
-    - Components like `Home` consume `useBlog()`.
-    - `NewsGrid` receives `posts` and mapping them to UI cards.
+3.  **Email Subscription**:
+    - User enters email in `JoinNetwork.jsx`.
+    - Calls `/api/subscribe`.
+    - Backend inserts into DB + Sends Email.
+
+4.  **Admin Broadcast**:
+    - Admin clicks "Send Burst" in `AdminBurst.jsx`.
+    - Calls `/api/burst` (checks Auth Token from headers).
+    - Backend iterates all subscribers and sends email via Nodemailer.
 
 ## 4. Connection Map
 
 | Component | Connected To | Reason |
 | :--- | :--- | :--- |
 | `Home.jsx` | `BlogContext` | Needs list of posts to display in grid. |
-| `Home.jsx` | `Header/Footer` | Layout structure. |
-| `BlogPost.jsx` | `BlogContext` | Needs to find specific post by ID. |
+| `AdminBurst.jsx` | `api/burst.js` | Triggers manual email broadcast. |
+| `JoinNetwork.jsx` | `api/subscribe.js` | Triggers subscription flow. |
 | `EditPost.jsx` | `Supabase` | Direct DB writes for creating/updating content. |
-| `App.jsx` | `BlogContext` | Provides the context provider to the tree. |
+| `CoreLogs.jsx` | `BlogContext` | Displays raw list of posts in list view. |

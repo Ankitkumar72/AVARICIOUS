@@ -4,16 +4,26 @@ A futuristic, cyberpunk-themed news and data archival system.
 
 ## 🚀 Overview
 
-**PIXY|NEWS.SYS** is a specialized front-end application designed to mimic a high-tech terminal interface. It serves as a news portal but operates like a system core, featuring "Core Logs," "System Integrity" checks, and an "Enforcement Bypass" module. It is powered by **React** (Vite) and backed by **Supabase** for real-time data and storage.
+**PIXY|NEWS.SYS** is a specialized front-end application designed to mimic a high-tech terminal interface. It serves as a news portal but operates like a system core, featuring "Core Logs," "System Integrity" checks, and an "Enforcement Bypass" module.
+
+It is a **Hybrid Application**:
+-   **Frontend**: React (Vite) for the immersive UI.
+-   **Backend**: Vercel Serverless Functions for email automation and cron jobs.
+-   **Database**: Supabase for real-time data and storage.
 
 ## ✨ Features
 
 *   **Terminal Interface**: Custom CSS and animations (`scanlines`, `glitch` effects) to simulate a CRT monitor environment.
 *   **Dynamic Blog Engine**: All logs/articles are stored in a database and rendered using Markdown (supports tables, code blocks, and images).
+*   **Communication Hub (New)**:
+    *   **Subscribe**: Users can join the "Network" to receive updates.
+    *   **Auto-Digest**: Automated weekly emails (Wed/Sun) summarizing recent posts via Vercel Cron.
+    *   **Burst Control**: Admins can broadcast manual messages to all subscribers via the "Uplink" console.
+*   **Core Logs**: A raw data view of system activities and archive entries.
 *   **System Integrity Module**: A dashboard visualizing real-time system metrics, threat levels, and module status.
+*   **Enforcement Bypass**: An interactive "hacking" module.
 *   **Admin Editor**: A protected `/editor` route that allows authorized users ("Unit Admins") to write, format, and upload new logs directly to the live site.
 *   **Secure Auth**: Restricts access to sensitive areas using Supabase Authentication.
-*   **Responsive Design**: Fully optimized for mobile devices (includes custom grid tables and touch-friendly navigation).
 
 ## 🛠️ Tech Stack
 
@@ -21,9 +31,10 @@ A futuristic, cyberpunk-themed news and data archival system.
 *   **Language**: JavaScript (ES6+)
 *   **Styling**: Tailwind CSS + Custom CSS Variables
 *   **Database**: Supabase (PostgreSQL)
-*   **Storage**: Supabase Storage (for asset uploads)
-*   **Routing**: React Router DOM v6+
-*   **Markdown**: `react-markdown` + `remark-gfm`
+*   **Backend Logic**: Vercel Serverless Functions (`/api/*`)
+*   **Email Service**: Nodemailer (Gmail SMTP)
+*   **Automation**: Vercel Cron Jobs
+*   **Deployment**: Vercel
 
 ## ⚙️ Installation & Setup
 
@@ -39,23 +50,21 @@ A futuristic, cyberpunk-themed news and data archival system.
     ```
 
 3.  **Configure Environment Variables**
-    Create a `.env` file in the root directory and add your Supabase credentials:
+    Create a `.env` file in the root directory and add your credentials:
     ```env
     VITE_SUPABASE_URL=your_supabase_project_url
     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    GMAIL_USER=your_email@gmail.com
+    GMAIL_APP_PASSWORD=your_app_password
     ```
 
-4.  **Database Setup (First Time Only)**
-    If you are setting this up largely from scratch, you need to initialize the Supabase tables.
-    *   Go to your Supabase Dashboard -> SQL Editor.
-    *   Run the content of `src/db_setup.sql` to create the `news_posts` table.
-    *   Run the content of `src/storage_setup.sql` to create the `blog_assets` bucket.
+4.  **Database Setup**
+    *   Run `src/db_setup.sql` in Supabase SQL Editor (creates `news_posts`).
+    *   Run `src/setup_email_logs.sql` (creates `email_logs`, `subscribers`).
 
 5.  **Run Locally**
-    ```bash
-    npm run dev
-    ```
-    Access the system at `http://localhost:5173`.
+    *   **Frontend**: `npm run dev` (http://localhost:5173)
+    *   **Backend API**: To test API functions locally, use `vercel dev`.
 
 ## 📦 Deployment
 
@@ -63,15 +72,13 @@ This project is optimized for **Vercel**.
 
 1.  Push your code to GitHub.
 2.  Import the project into Vercel.
-3.  **Crucial**: Add your `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to Vercel's "Environment Variables" settings.
-4.  Deploy.
-
-*(See `DEPLOYMENT_GUIDE.md` for a detailed walkthrough)*
+3.  **Crucial**: Add all Environment Variables (`VITE_SUPABASE_*`, `GMAIL_*`) in Vercel settings.
+4.  **Cron Jobs**: Automatically configured via `vercel.json` upon deployment.
 
 ## 🛡️ Security
 
-*   **RLS Policies**: The database is configured with Row Level Security. Public users can read logs, but only authenticated users can modify them (configure this in Supabase policies).
-*   **Route Protection**: The `/editor` page checks for a valid session token before loading.
+*   **RLS Policies**: The database is configured with Row Level Security. Public users can read logs, but only authenticated users can modify them.
+*   **Route Protection**: The `/editor` and `/admin/uplink` pages check for a valid session token.
 
 ## 📄 License
 
