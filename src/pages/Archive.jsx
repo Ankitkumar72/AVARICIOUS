@@ -110,7 +110,7 @@ const postItems = (posts, limit) => {
             {/* Meta Data */}
             <div className="col-span-2 flex flex-col justify-center md:items-end text-left md:text-right mono text-xs gap-1 text-secondary">
                 <div className="text-accent mb-1">ID: {String(post.id).padStart(4, '0')}</div>
-                <div>DATE: {post.updated_at ? new Date(post.updated_at).toLocaleDateString().replace(/\//g, '.') : 'UNKNOWN'}</div>
+
                 <div>COORD: {post.coordinates || '34.052°N, 118.243°W'}</div>
             </div>
 
