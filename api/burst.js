@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+
 import nodemailer from 'nodemailer';
+import { marked } from 'marked';
 
 // Initialize Supabase
 const supabase = createClient(
@@ -21,7 +23,16 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { subject, content, node_origin, latency_pref } = req.body;
+    let { subject, content, node_origin, latency_pref } = req.body;
+
+    // Check for Subject override in content
+    // Looks for "Subject: <text>" at the very start of the content
+    const subjectMatch = content.match(/^Subject:\s*(.+)(?:\r\n|\r|\n)/i);
+    if (subjectMatch) {
+        subject = subjectMatch[1].trim();
+        // Remove the subject line from the content
+        content = content.substring(subjectMatch[0].length).trim();
+    }
 
     if (!subject || !content) {
         return res.status(400).json({ error: 'Missing subject or content' });
@@ -65,7 +76,10 @@ export default async function handler(req, res) {
                                 ${subject}
                             </h2>
 
-                            <div style="white-space: pre-wrap;">${content}</div>
+
+                            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ccc;">
+                                ${marked.parse(content)}
+                            </div>
 
                             <hr style="border: 1px solid #333; margin: 30px 0;">
 

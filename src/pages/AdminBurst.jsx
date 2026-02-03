@@ -96,6 +96,11 @@ Nodes must re-initialize connection by 24:00.
                 }),
             });
 
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") === -1) {
+                throw new Error("API response is not JSON. If running locally, make sure to use 'vercel dev' instead of 'npm run dev'.");
+            }
+
             const data = await response.json();
 
             if (response.ok) {

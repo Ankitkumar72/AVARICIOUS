@@ -28,17 +28,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // [MODIFIED] 1. Skip DB Insert (Handled by Home.jsx in 'collective_members')
-        // const { error: dbError } = await supabase
-        //     .from('subscribers')
-        //     .insert([{ email, status: 'active' }]);
 
-        // // Ignore unique constraint error
-        // if (dbError && dbError.code !== '23505') {
-        //     throw dbError;
-        // }
-
-        // 2. Send Welcome Email (Immediate)
         await transporter.sendMail({
             from: `"Elias-7 [Sector_7_Node]" <${process.env.GMAIL_USER}>`,
             to: email,
