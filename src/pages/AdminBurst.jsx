@@ -81,6 +81,12 @@ Nodes must re-initialize connection by 24:00.
     };
 
     const handleBroadcast = async () => {
+        // Validation: Check for empty subject or content
+        if (!formData.subject_id?.trim() || !formData.content?.trim()) {
+            alert("ERROR: SUBJECT_ID and CONTENT cannot be empty.");
+            return;
+        }
+
         setStatus('SENDING');
         try {
             const response = await fetch('/api/burst', {
