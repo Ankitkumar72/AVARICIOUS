@@ -81,7 +81,15 @@ const Archive = () => {
 // Helper function to render list items
 const postItems = (posts, limit) => {
     return posts.slice(0, limit).map((post) => (
-        <div key={post.id} className="group grid grid-cols-1 md:grid-cols-12 gap-6 px-6 md:px-16 py-10 border-b border-white/5 hover:bg-white/[0.02] transition-colors relative">
+        <div key={post.id} className="group grid grid-cols-1 md:grid-cols-12 gap-6 px-6 md:px-16 py-10 border-b border-white/5 hover:bg-white/[0.02] transition-colors relative overflow-hidden">
+
+            {/* Background Image Overlay */}
+            {post.image_url && (
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none"
+                    style={{ backgroundImage: `url(${post.image_url})` }}
+                />
+            )}
 
             {/* Visual Ref (Thumbnail) */}
             <div className="col-span-2 relative">

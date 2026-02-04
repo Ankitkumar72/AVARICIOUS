@@ -133,6 +133,29 @@ function BlogPost() {
     return (
         <div className="app-main-wrapper">
             <div className="app-layout">
+                {/* Background Image Overlay */}
+                {/* Background Image Overlay - Responsive Implementation */}
+                {post?.image_url && (
+                    <div
+                        className="post-bg-overlay-wrapper"
+                        style={{
+                            position: 'absolute',
+                            inset: 0,
+                            zIndex: 0,
+                            pointerEvents: 'none',
+                            overflow: 'hidden'
+                        }}
+                    >
+                        <div className="md:absolute md:inset-0 md:h-full sticky top-0 h-screen w-full flex justify-center items-center">
+                            <img
+                                src={post.image_url}
+                                alt=""
+                                className="w-full h-full object-cover object-center opacity-[0.15] grayscale"
+                            />
+                        </div>
+                    </div>
+                )}
+
                 <div className="corner-marker corner-top-left"></div>
                 <div className="corner-marker corner-top-right"></div>
                 <div className="corner-marker corner-bottom-left"></div>
